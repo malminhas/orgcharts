@@ -35,4 +35,14 @@ org.create_graphviz_layout_from_graph(g, scale=6, offset=20, node_size=20000, im
 print(f'Successfully generated organogram into file {target} of size {round(os.path.getsize(target)/1024,1)}kB')
 ```
 
+Note the following:
+* Managers have a thick black border around their box.
+* Employees who are leaving are in orange
+* Employees who are yet to join are in teal
+* Employees who are moving to another team are in light green
+* Contractors are in grey
+* All other employees are in dark green
+* Direct line management in indicated in a solid line
+* Indirect management/supervision is indicated by a dotted line
+
 <img width="1715" alt="image" src="test.png">
