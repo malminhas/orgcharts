@@ -4,7 +4,7 @@ import networkx as nx
 import matplotlib.pyplot as plt
 
 VALID_STATUS = ['perm','contractor','starting','leaving','moving','new']
-VALID_TEAM = ['Reviews','Jobs Board','Jobs Mgmt','HEX','Search','Octo']
+VALID_TEAM = []
 VALID_RELATION = [1,2,3,4]
 NODE_SIZE = 7000
 EDGE_LABEL_HEIGHT = 0.3
