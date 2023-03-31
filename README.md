@@ -15,11 +15,11 @@ g = org.create_graph_from_yaml(org.load_yaml_file('test.yaml'),newline=True)
 dotfile = org.create_dotfile_from_graph(g, dot_file='test.dot')
 ```
 
-The generated dot file can be loaded into a corresponding editor tool such as [Graphity](https://www.graphity.com/).  Graphity allows us to modify the visualisation to a hierarchical display as follows:
+The generated dot file can be loaded into a corresponding editor tool such as [Graphity](https://www.graphity.com/).  Graphity allows us to modify the visualisation to a hierarchical layout as follows:
 
 <img width="1715" alt="image" src="https://user-images.githubusercontent.com/12896870/228997347-f14454d6-12e7-4d78-beaa-ec9c619af93f.png">
 
-Once loaded into Graphity, the organisation diagram elements can then be updated:
+Once loaded into Graphity, the organisation diagram elements can then be individually updated and stylee:
 
 <img width="1715" alt="image" src="https://user-images.githubusercontent.com/12896870/228997547-14efeb67-614e-4c32-8685-5175673e971b.png">
 
