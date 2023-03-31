@@ -23,7 +23,7 @@ Once loaded into Graphity, the organisation diagram elements can then be individ
 
 <img width="1715" alt="image" src="https://user-images.githubusercontent.com/12896870/228997547-14efeb67-614e-4c32-8685-5175673e971b.png">
 
-### Generating A
+### Generating a standalone image
 Alternatively we can generate an inline image as follows:
 
 ```
