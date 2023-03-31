@@ -122,9 +122,9 @@ class OrganisationDiagrammer(object):
         return dot_file
 
 if __name__ == '__main__':
-    target = 'homeowner.png'
+    target = 'test.png'
     org = OrganisationDiagrammer()
-    data = org.load_yaml_file('homeowner.yaml')
+    data = org.load_yaml_file('test.yaml')
     g = org.create_graph_from_yaml(data)
     org.create_graphviz_layout_from_graph(g, scale=4, image_file=target)
     print(f'Successfully generated organogram into file {target} of size {os.path.getsize(target)/1024}kB')
