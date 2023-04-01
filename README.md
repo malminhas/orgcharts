@@ -32,7 +32,8 @@ from organogram import OrganisationDiagrammer
 
 target = 'test.png'
 org.create_graphviz_layout_from_graph(g, scale=4, cstyle='arc', node_size=12000, image_file=target)
-print(f'Successfully generated organogram into file {target} of size {os.path.getsize(target)/1024}kB')
+size = os.path.getsize(target)/1024
+print(f'Successfully generated organogram into file {target} of size {size}kB')
 ```
 
 Note the following:
@@ -55,7 +56,8 @@ from organogram import OrganisationDiagrammer
 
 target = 'test.png'
 org.create_graphviz_layout_from_graph(g, scale=4, cstyle='angle', node_size=12000, image_file=target)
-print(f'Successfully generated organogram into file {target} of size {os.path.getsize(target)/1024}kB')
+size = os.path.getsize(target)/1024
+print(f'Successfully generated organogram into file {target} of size {size}kB')
 ```
 
 <img width="1715" alt="image" src="test2.png">
