@@ -60,4 +60,4 @@ size = os.path.getsize(target)/1024
 print(f'Successfully generated organogram into file {target} of size {size}kB')
 ```
 
-<img width="1715" alt="image" src="test2.png">
+<img width="1500" alt="image" src="test2.png">
