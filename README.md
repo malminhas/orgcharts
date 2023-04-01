@@ -31,8 +31,8 @@ import os
 from organogram import OrganisationDiagrammer
 
 target = 'test.png'
-org.create_graphviz_layout_from_graph(g, scale=6, offset=20, node_size=20000, image_file=target)
-print(f'Successfully generated organogram into file {target} of size {round(os.path.getsize(target)/1024,1)}kB')
+org.create_graphviz_layout_from_graph(g, scale=4, cstyle='arc', node_size=12000, image_file=target)
+print(f'Successfully generated organogram into file {target} of size {os.path.getsize(target)/1024}kB')
 ```
 
 Note the following:
@@ -46,3 +46,16 @@ Note the following:
 * Indirect management/supervision is indicated by a dotted line
 
 <img width="1715" alt="image" src="test.png">
+
+We can generate a version with right angles that looks more like an org chart as follows:
+
+```
+import os
+from organogram import OrganisationDiagrammer
+
+target = 'test.png'
+org.create_graphviz_layout_from_graph(g, scale=4, cstyle='angle', node_size=12000, image_file=target)
+print(f'Successfully generated organogram into file {target} of size {os.path.getsize(target)/1024}kB')
+```
+
+<img width="1715" alt="image" src="test2.png">
