@@ -46,7 +46,7 @@ Note the following:
 * Direct line management in indicated in a solid line
 * Indirect management/supervision is indicated by a dotted line
 
-<img width="1715" alt="image" src="test.png">
+<img width="1500" alt="image" src="test.png">
 
 We can generate a version with right angles that looks more like an org chart as follows:
 
