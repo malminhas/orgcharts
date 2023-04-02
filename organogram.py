@@ -11,19 +11,51 @@ NODE_SIZE = 7000
 EDGE_LABEL_HEIGHT = 0.3
 
 def split_line(val):
-    return '\n'.join(val.split(' ',1))
-    
-def proc_field(val, newline, upper=False):
-    if newline:
+    if val:
         val = '\n'.join(val.split(' ',1))
-    if upper:
-        val = val.upper()
+    return val
+
+def proc_field(val, newline=False, upper=False):
+    if val:
+        if newline:
+            val = '\n'.join(val.split(' ',1))
+        if upper:
+            val = val.upper()
+    else:
+        val = ''
     return val
 
 class OrganisationDiagrammer(object):
     def __init__(self):
         self._graph = None
-    
+        self._validTeams = VALID_TEAM
+        self._validStatus = VALID_STATUS
+        self._validRelations = VALID_RELATION
+
+    @property
+    def validTeams(self):
+        return self._validTeams
+        
+    def setValidTeams(self, teams):
+        assert(isinstance(teams, list))
+        self._validTeams = teams
+
+    @property
+    def validStatus(self):
+        return self._validStatus
+
+    def setValidStatus(self, status):
+        assert(isinstance(status, list))
+        self._validStatus = status
+
+    @property
+    def validRelations(self):
+        return self._validRelations
+
+    def setValidRelations(self, relation):
+        assert(isinstance(relation, list))
+        self._validRelations = relation
+        
     def load_yaml_file(self, file_path):
         with open(file_path, 'r') as file:
             data = yaml.safe_load(file)
@@ -32,30 +64,33 @@ class OrganisationDiagrammer(object):
     def create_graph_from_yaml(self, yaml_data, newline=True, validate=False):
         g = nx.DiGraph()
         for node in yaml_data['nodes']:
-            name = proc_field(node['id'], newline)
-            note = node.get('note')
-            team = node.get('team')
-            job = node.get('label')
-            rank = node.get('rank')
+            name = proc_field(node.get('id'), newline)
+            note = proc_field(node.get('note'))
+            team = proc_field(node.get('team'))
+            job = proc_field(node.get('label'))
+            rank = proc_field(node.get('rank'))
+            manager = proc_field(node.get('manager'))
             if team:
                 if validate:
-                    assert(team in VALID_TEAM)
+                    assert(team in self._validTeams)
                 team = proc_field(team, newline, upper=True)
-            status = node['status']
-            if validate:
-                assert(status in VALID_STATUS)
-            g.add_node(name, rank=rank, jobtitle=job, status=status, manager=node['manager'], note=note, team=team)
+            status = node.get('status')
+            if validate and status:
+                assert(status in self._validStatus)
+            if name:
+                g.add_node(name, rank=rank, jobtitle=job, status=status, manager=manager, note=note, team=team)
         for edge in yaml_data['edges']:
-            source = proc_field(edge['source'], newline)
-            target = proc_field(edge['target'], newline)
-            label = edge.get('label') or ''
-            relation = edge['relationship']
+            source = proc_field(edge.get('source'), newline)
+            target = proc_field(edge.get('target'), newline)
+            label = proc_field(edge.get('label'))
+            relation = proc_field(edge.get('relationship'))
             if validate:
-                assert(relation in VALID_RELATION)
-            g.add_edge(source, target, label=label, relationship=relation)
+                assert(relation in self._validRelations)
+            if source:
+                g.add_edge(source, target, label=label, relationship=relation)
         return g
 
-    def create_graphviz_layout_from_graph(self, g, scale=4, cstyle='arc3', margin=0.1, node_size=NODE_SIZE, image_file='org.png'):
+    def create_graphviz_layout_from_graph(self, g, scale=4, cstyle='arc3', margin=0.1, offset=None, node_size=NODE_SIZE, image_file='org.png'):
         # 1. Pull out the different relationships for edges
         # Can be 1 for direct management, 2 for indirect management, 3 for a perm yet to join, 4 for a perm leaving.
         e_direct = [(u, v) for (u, v, d) in g.edges(data=True) if d['relationship'] == 1 ]
@@ -116,7 +151,10 @@ class OrganisationDiagrammer(object):
         # note labels - rotate edge labels to be horizontal
         fcolor = 'none'
         ecolor = 'none'
-        if scale > 3:
+        if offset:
+            # we will force use the offset provided
+            size = (1/scale)*50
+        elif scale > 3:
             offset = (1/scale) * 35
             size = 16
         elif scale <= 3:
@@ -145,7 +183,9 @@ class OrganisationDiagrammer(object):
 
     def create_dotfile_from_graph(self, g, dot_file):
         ''' Need to pip install pydot for this '''
-        nx.drawing.nx_pydot.write_dot(g, dot_file)
+        # nx.drawing.nx_pydot is deprecated.
+        #nx.drawing.nx_pydot.write_dot(g, dot_file)  
+        nx.nx_agraph.write_dot(g, dot_file)
         return dot_file
 
 if __name__ == '__main__':
@@ -155,6 +195,6 @@ if __name__ == '__main__':
     g = org.create_graph_from_yaml(data)
     dotfile = org.create_dotfile_from_graph(g,'test.dot')
     print(f'Successfully created dot file {dotfile} of size {os.path.getsize(dotfile)/1024}kB')
-    org.create_graphviz_layout_from_graph(g, scale=4, cstyle='angle', node_size=12000, image_file=target)
+    org.create_graphviz_layout_from_graph(g, scale=4, cstyle='arc', node_size=12000, image_file=target)
     print(f'Successfully generated organogram into file {target} of size {os.path.getsize(target)/1024}kB')
     f = Image.open(target).show()
