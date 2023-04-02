@@ -3,6 +3,12 @@
 ### Overview
 Thsi repo contains a Jupyterlab notebook called [`engineering-org-chart-zero.ipynb`](engineering-org-chart-zero.ipynb) which contains support to allow us to create organograms using the [`organogram.py`](organogram.py) module.  This module leverages the Python `networkx.py` library to draw an organisation diagram directly from a dot file.  
 
+### Installation
+Create a virtualenv and 
+```
+$ pip install -r requirements.txt
+```
+
 ### Generating the dot file
 The following code illustrates how to create a dot file from a YAML organisation structure held in [test.yaml](test.yaml).
 
@@ -23,7 +29,7 @@ Once loaded into Graphity, the organisation diagram elements can then be individ
 
 <img width="1715" alt="image" src="https://user-images.githubusercontent.com/12896870/228997547-14efeb67-614e-4c32-8685-5175673e971b.png">
 
-### Generating a standalone image
+### Generating a standalone org chart
 Alternatively we can generate an inline image as follows:
 
 ```
@@ -61,3 +67,9 @@ print(f'Successfully generated organogram into file {target} of size {size}kB')
 ```
 
 <img width="1500" alt="image" src="test2.png">
+
+### Test code
+Run the test code from the same directory with coverage as follows:
+```
+$ pytest --exitfirst --failed-first --cov=. --cov-report html -vv
+```
