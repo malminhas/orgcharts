@@ -68,7 +68,7 @@ print(f'Successfully generated organogram into file {target} of size {size}kB')
 
 <img width="1500" alt="image" src="test2.png">
 
-### Test code
+### Tests
 Run the test code from the same directory with coverage as follows:
 ```
 $ pytest --exitfirst --failed-first --cov=. --cov-report html -vv
