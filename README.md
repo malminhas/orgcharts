@@ -18,7 +18,7 @@ nodes:
   manager: 'yes'
   status: perm
   team: Team A
-  note: a bit of a tyrant
+  note: tyrant more like
 - id: Tech Minion
   label: CTO
   manager: 'no'
@@ -30,7 +30,8 @@ edges:
   target: Tech Minion
 ```
 Here `id` is the name of the person which goes into the node cell and `label` is their job title which goes under the cell.  Their `status` sets the colour of the box - a `perm` employee is green, a `contractor` is grey, `leaving` is orange and `starting` is teal.  If they are a `manager` they get a thick black border round the cell.  The `team` name appears capitalised just above the cell.  You can also add a `note` that goes into the cell.  If `newline` is set True, the graph will put a newline into the first space of the `label` and `note`.  There are three settings that can be adjusted .  First of all `scale` sets the overall size of the text and cells, `offset` adjusts the text spacing and `node_size` sets the size of the cells.  Finally there are two basic styles namely `arc` which draws straight lines between cells and `angle` which draws the traditional right-angled links between the cells.
-Running the following code in a Jupyter notebook:
+
+We can now the following code in a Jupyter notebook on a file called `tycoon.yaml` containing the above YAML:
 ```
 import os
 from organogram import OrganisationDiagrammer
@@ -41,7 +42,7 @@ g2 = org.create_graph_from_yaml(org.load_yaml_file('tycoon.yaml'),newline=True)
 org.create_graphviz_layout_from_graph(g2, scale=3, cstyle='angle', offset=3, node_size=10000, image_file=target)
 print(f'Successfully generated organogram into file {target} of size {round(os.path.getsize(target)/1024,1)}kB')
 ```
-generates this inline image:
+This generates the following inline image in the notebook:
 ![image](https://user-images.githubusercontent.com/12896870/230230815-8ec80f7f-330f-4b6e-a858-c4d8df3bdec6.png)
 
 ### Generating an organisation dot file
