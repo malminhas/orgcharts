@@ -105,6 +105,39 @@ print(f'Successfully generated organogram into file {target} of size {size}kB')
 
 <img width="1500" alt="image" src="test2.png">
 
+### CLI
+There is a command line interface built into the module.  Here's the built in help:
+```
+$ python organogram.py -h
+    organogram.py
+    ----------------
+    Usage:
+    organogram.py -s <source> [-m <margin>] [-n <nodesize>] [-f <style>] [-o <offset>] [-x <fontsize>] [-v]
+    organogram.py -h | --help
+    organogram.py -V | --version
+    Options:
+    -h, --help                              Show this screen.
+    -v, --verbose                           Verbose mode.
+    -V, --version                           Show version.
+    -s <source>, --source <source>          Source YAML.
+    -n <nodesize>, --nodesize <nodesize>    Node size.  Default is 7000.
+    -m <margin>, --margin <margin>          Margin.  Default 0.1.
+    -f <style>, --style <style>             Edge style. Default is arc3.
+    -o <offset>, --offset <offset>          Offset.  Default is 0.
+    -x <fontsize>, --fontsize <fontsize>    Font size of node text.  Default is 12.
+    Examples
+    1. Generate verbose graphviz visualisation of test.yaml:
+    organogram.py -s test.yaml --margin 0.2 -f angle3 -n 7500 --offset 8 -x 16 -v
+    2. Generate graphviz visualisation of tycoon.yaml:
+    organogram.py -s tycoon.yaml --margin 0.2 -f angle -n 15000 --offset 3 -x 18
+    3. Generate graphviz visualisation of homeowner.yaml:
+    organogram.py -s homeowner.yaml --margin 0.01 -f arc -n 7500 -o 5 -x 14
+```
+And here's an example of how to use it to build the above organogram from the included `test.yaml` with verbose logging enabled:
+```
+$ python organogram.py -s test.yaml --margin 0.2 -f angle -n 7500 --offset 8 -x 16 -v
+```
+
 ### Tests
 Run the test code from the same directory with coverage as follows:
 ```
