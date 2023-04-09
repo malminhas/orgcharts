@@ -72,13 +72,12 @@ VALID_STATUS = ["perm", "contractor", "starting", "leaving", "moving", "new"]
 VALID_TEAM = ["A", "B", "C", "D", "E", "F"]
 VALID_RELATION = [1, 2, 3, 4]
 
-DEFAULT_NODE_SIZE = 7000
+DEFAULT_NODE_SIZE = 7500
 DEFAULT_MARGIN = 0.1
 DEFAULT_CSTYLE = "arc3"
-DEFAULT_SCALE = 4
-DEFAULT_OFFSET = 1
+DEFAULT_OFFSET = 7
 DEFAULT_EDGE_LABEL_HEIGHT = 0.3
-DEFAULT_NODE_FONT_SIZE = 12
+DEFAULT_FONT_SIZE = 16
 
 
 def initLogger(verbose: bool) -> Logger:
@@ -174,7 +173,7 @@ class OrganisationDiagrammer(object):
         node_size: int = DEFAULT_NODE_SIZE,
         margin: float = DEFAULT_MARGIN,
         cstyle: str = DEFAULT_CSTYLE,
-        scale: int = DEFAULT_SCALE,
+        font_size: int = DEFAULT_FONT_SIZE,
         offset: int = DEFAULT_OFFSET,
     ):
         """
@@ -185,7 +184,7 @@ class OrganisationDiagrammer(object):
         self._node_size = node_size
         self._margin = margin
         self._cstyle = cstyle
-        self._scale = scale
+        self._font_size = font_size
         self._offset = offset
         self._validTeams = VALID_TEAM
         self._validStatus = VALID_STATUS
@@ -509,7 +508,7 @@ class OrganisationDiagrammer(object):
         cstyle: str,
         font_size: int,
         using_edge_labels: bool,
-        edge_label_height: int,
+        edge_label_height: float,
     ):
         """
         Draw edge labels from NetworkX graph controlling position and size.
@@ -722,11 +721,11 @@ if __name__ == "__main__":
 
         """
         verbose = False
-        style = DEFAULT_CSTYLE
+        cstyle = DEFAULT_CSTYLE
         node_size = DEFAULT_NODE_SIZE
         margin = DEFAULT_MARGIN
         offset = DEFAULT_OFFSET
-        font_size = DEFAULT_NODE_FONT_SIZE
+        font_size = DEFAULT_FONT_SIZE
         logger = initLogger(False)
         target = "test.png"
 
@@ -738,7 +737,7 @@ if __name__ == "__main__":
                 v = default
             return v
 
-        if arguments.get("--verbose") or arguments.get("-v"):
+        if arguments.get("--verbose"):
             verbose = True
             logger = initLogger(verbose)
             logger.info(f"::main() - arguments =\n{arguments}")
