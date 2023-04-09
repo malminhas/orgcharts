@@ -109,3 +109,13 @@ Run the test code from the same directory with coverage as follows:
 ```
 $ pytest --exitfirst --failed-first --cov=. --cov-report html -vv
 ```
+### Tests
+Run the Sphinx documentation as follows:
+```
+$ cd docs
+$ make html
+$ open build/html/index.html
+```
+Here's an example of what it looks like:
+<img width="1098" alt="image" src="https://user-images.githubusercontent.com/12896870/230799671-6a897641-06cb-4308-9940-a509cfd53111.png">
+
