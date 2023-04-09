@@ -74,10 +74,11 @@ VALID_RELATION = [1, 2, 3, 4]
 
 DEFAULT_NODE_SIZE = 7000
 DEFAULT_MARGIN = 0.1
-DEFAULT_CSTYLE = 'arc3'
+DEFAULT_CSTYLE = "arc3"
 DEFAULT_SCALE = 4
 DEFAULT_OFFSET = 1
 DEFAULT_EDGE_LABEL_HEIGHT = 0.3
+DEFAULT_NODE_FONT_SIZE = 12
 
 
 def initLogger(verbose: bool) -> Logger:
@@ -136,7 +137,7 @@ def get_file_size(filename: str) -> float:
 
 def split_line(val: str) -> str:
     """
-    Split the input string on first 
+    Split the input string on first
 
     **Parameters**
 
@@ -163,16 +164,23 @@ def proc_field(val: str, newline: bool = False, upper: bool = False) -> str:
             val = val.upper()
     else:
         val = ""
-    logger.info(f'::proc_field() - converting {repr(inputval)} to {repr(val)}')
+    logger.info(f"::proc_field() - converting {repr(inputval)} to {repr(val)}")
     return val
 
 
 class OrganisationDiagrammer(object):
-    def __init__(self, node_size: int=DEFAULT_NODE_SIZE, margin: float=DEFAULT_MARGIN, cstyle: str=DEFAULT_CSTYLE, scale: int=DEFAULT_SCALE, offset: int=DEFAULT_OFFSET):
+    def __init__(
+        self,
+        node_size: int = DEFAULT_NODE_SIZE,
+        margin: float = DEFAULT_MARGIN,
+        cstyle: str = DEFAULT_CSTYLE,
+        scale: int = DEFAULT_SCALE,
+        offset: int = DEFAULT_OFFSET,
+    ):
         """
         Constructor method. Creates a :py:class: `OrganisationDiagrammer` instance
         """
-        logger.info(f'OrganisationDiagrammer::__init__() - constructor')
+        logger.info(f"OrganisationDiagrammer::__init__() - constructor")
         self._graph = None
         self._node_size = node_size
         self._margin = margin
@@ -186,24 +194,24 @@ class OrganisationDiagrammer(object):
     @property
     def valid_teams(self) -> List:
         """
-        Return valid teams 
-        
+        Return valid teams
+
         **Parameters**
 
         **Returns**
-        
+
         validTeams : `List`
             list of current valid teams. eg. ["A", "B", "C", "D", "E", "F"]
-        
+
         """
         return self._validTeams
 
     def set_valid_teams(self, teams: List):
         """
         Set valid teams list
-        
+
         **Parameters**
-        
+
         teams : `List`
             list of valid teams. eg. "A", "B", "C", "D", "E", "F"]
 
@@ -211,30 +219,32 @@ class OrganisationDiagrammer(object):
 
         """
         assert isinstance(teams, list)
-        logger.info(f'OrganisationDiagrammer::set_valid_teams() - setting valid teams to "{teams}"')
+        logger.info(
+            f'OrganisationDiagrammer::set_valid_teams() - setting valid teams to "{teams}"'
+        )
         self._validTeams = teams
 
     @property
     def valid_status(self) -> List:
         """
-        Return valid statuses 
-        
+        Return valid statuses
+
         **Parameters**
 
         **Returns**
-        
+
         validStatus : `List`
             list of current valid statuses. eg. ["perm", "contractor","new"]
-        
+
         """
         return self._validStatus
 
     def set_valid_status(self, status):
         """
         Set valid status list
-        
+
         **Parameters**
-        
+
         status : `List`
             list of valid status. eg. ["perm", "contractor","new"]
 
@@ -242,30 +252,32 @@ class OrganisationDiagrammer(object):
 
         """
         assert isinstance(status, list)
-        logger.info(f'OrganisationDiagrammer::set_valid_status() - setting valid status to "{status}"')
+        logger.info(
+            f'OrganisationDiagrammer::set_valid_status() - setting valid status to "{status}"'
+        )
         self._validStatus = status
 
     @property
     def valid_elations(self) -> List:
         """
-        Return valid relations 
-        
+        Return valid relations
+
         **Parameters**
 
         **Returns**
-        
+
         validRelations : `List`
             list of current valid relations. eg. [1,2,3,4]
-        
+
         """
         return self._validRelations
 
     def set_valid_relations(self, relations: List):
         """
         Set valid relations list
-        
+
         **Parameters**
-        
+
         relation : `List`
             list of valid relations. eg. [1,2,3,4]
 
@@ -273,25 +285,29 @@ class OrganisationDiagrammer(object):
 
         """
         assert isinstance(relations, list)
-        logger.info(f'OrganisationDiagrammer::set_valid_relations() - setting valid relations to "{relations}"')
+        logger.info(
+            f'OrganisationDiagrammer::set_valid_relations() - setting valid relations to "{relations}"'
+        )
         self._validRelations = relations
 
-    def load_yaml_file(self, file_path: str) -> Dict[Optional[Any],Optional[Any]]:
+    def load_yaml_file(self, file_path: str) -> Dict[Optional[Any], Optional[Any]]:
         """
         Load YAML organisation configuration file and convert to Dict
-        
+
         **Parameters**
-        
+
         file_path : `str`
             name of YAML file
 
         **Returns**
-        
+
         data : `Dict`
             dictionary of `nodes` and `edges`
 
         """
-        logger.info(f'OrganisationDiagrammer::load_yaml_file() - loading YAML from "{file_path}"')
+        logger.info(
+            f'OrganisationDiagrammer::load_yaml_file() - loading YAML from "{file_path}"'
+        )
         with open(file_path, "r") as file:
             data = yaml.safe_load(file)
         return data
@@ -301,24 +317,26 @@ class OrganisationDiagrammer(object):
     ) -> nx.DiGraph:
         """
         Create NetworkX graph from YAML data.
-        
+
         **Parameters**
-        
+
         yaml_data : `Dict`
             dictionary of `nodes` and `edges`
         newline : `bool`
             newline or not
-            
+
         validate : `bool`
             validate teams, statuses, relations or not.
 
         **Returns**
-        
+
         g : `nx.DiGraph`
             NetworkX graph of organisation built from yaml_data
 
         """
-        logger.info(f'OrganisationDiagrammer::create_graph_from_yaml() - newline={newline},  validate={validate}')
+        logger.info(
+            f"OrganisationDiagrammer::create_graph_from_yaml() - newline={newline},  validate={validate}"
+        )
         g = nx.DiGraph()
         for node in yaml_data["nodes"]:
             name = proc_field(node.get("id"), newline)
@@ -355,12 +373,14 @@ class OrganisationDiagrammer(object):
                 g.add_edge(source, target, label=label, relationship=relation)
         return g
 
-    def draw_networkx_nodes(self, g: nx.DiGraph, pos: Dict, margin: float, node_size: int):
+    def draw_networkx_nodes(
+        self, g: nx.DiGraph, pos: Dict, margin: float, node_size: int, font_size: int
+    ):
         """
-        Draw nodes from NetworkX graph.
-        
+        Draw nodes from NetworkX graph and corresponding node labels.
+
         **Parameters**
-        
+
         g : `nx.DiGraph`
             NetworkX graph of organisation built from yaml_data
         pos : `Dict`
@@ -369,24 +389,35 @@ class OrganisationDiagrammer(object):
             Margin between nodes.  Default is 0.1
         node_size : `int`
             Size of node.  Default is `DEFAULT_NODE_SIZE` (7000)
+        font_size : `int`
+            Node text font size.
 
         **Returns**
 
         """
-        logger.info(f'OrganisationDiagrammer::draw_networkx_nodes() - margin={margin}, node_size={node_size}, pos=\n{pos}')
+        logger.info(
+            f"OrganisationDiagrammer::draw_networkx_nodes() - margin={margin}, node_size={node_size}, pos=\n{pos}"
+        )
         # Pull out the different status cohorts for nodes
-        # status can be: perm|contractor|starter|joining|leaving
+        # status can be: perm|contractor|hiring|starter|joining|leaving
         n_perm = [(u) for (u, d) in g.nodes(data=True) if d.get("status") == "perm"]
         n_contractor = [
-            (u) for (u, d) in g.nodes(data=True) if d["status"] == "contractor"
+            (u) for (u, d) in g.nodes(data=True) if d.get("status") == "contractor"
         ]
         n_all = [(u) for (u, d) in g.nodes(data=True)]
-        n_starting = [(u) for (u, d) in g.nodes(data=True) if d.get("status") == "starting"]
-        n_leaving = [(u) for (u, d) in g.nodes(data=True) if d.get("status") == "leaving"]
+        n_starting = [
+            (u) for (u, d) in g.nodes(data=True) if d.get("status") == "starting"
+        ]
+        n_hiring = [
+            (u) for (u, d) in g.nodes(data=True) if d.get("status") == "hiring"
+        ]
+        n_leaving = [
+            (u) for (u, d) in g.nodes(data=True) if d.get("status") == "leaving"
+        ]
         n_moving = [(u) for (u, d) in g.nodes(data=True) if d.get("status") == "moving"]
         n_new = [(u) for (u, d) in g.nodes(data=True) if d.get("status") == "new"]
         n_manager = [(u) for (u, d) in g.nodes(data=True) if d.get("manager") == "yes"]
-        
+
         # nodes - see: https://matplotlib.org/stable/api/markers_api.html#module-matplotlib.markers
         # colors - see: https://matplotlib.org/stable/gallery/color/named_colors.html
         def drawNetworkXNodes(
@@ -405,29 +436,39 @@ class OrganisationDiagrammer(object):
             )
 
         drawNetworkXNodes(n_all, "green")
+        drawNetworkXNodes(n_hiring, "red")
         drawNetworkXNodes(n_leaving, "orange")
         drawNetworkXNodes(n_starting, "teal")
         drawNetworkXNodes(n_moving, "yellowgreen")
         drawNetworkXNodes(n_contractor, "grey")
         drawNetworkXNodes(n_manager, "none", 5.0, "black")
-        
+        nx.draw_networkx_labels(
+            g,
+            pos,
+            font_size=font_size,
+            font_color="w",
+            font_family="sans-serif",
+            horizontalalignment="center",
+            verticalalignment="bottom",
+        )
+
     def draw_networkx_edges(self, g: nx.DiGraph, pos: Dict, cstyle: str):
         """
         Draw edges from NetworkX graph.
-        
+
         **Parameters**
-        
+
         g : `nx.DiGraph`
             NetworkX graph of organisation built from yaml_data
         pos : `Dict`
             Dictionary of tuples of (x,y) positions of all nodes
-        style : `str`
+        cstyle : `str`
             Style to use for edges.  Can be one of: ['arc','arc3','angle','angle3'].
 
         **Returns**
 
         """
-        logger.info(f'OrganisationDiagrammer::draw_networkx_edges() - cstyle={cstyle}')
+        logger.info(f"OrganisationDiagrammer::draw_networkx_edges() - cstyle={cstyle}")
         # 1. Pull out the different relationships for edges
         # Can be 1 for direct management, 2 for indirect management, 3 for a perm yet to join, 4 for a perm leaving.
         e_direct = [
@@ -442,6 +483,7 @@ class OrganisationDiagrammer(object):
         e_leaving = [
             (u, v) for (u, v, d) in g.edges(data=True) if d.get("relationship") == 4
         ]
+
         # styles - see: https://matplotlib.org/stable/api/_as_gen/matplotlib.patches.Patch.html#matplotlib.patches.Patch.set_linestyle
         def drawNetworkXEdges(elist: List, w: int, a: float, color: str, style: str):
             nx.draw_networkx_edges(
@@ -459,25 +501,43 @@ class OrganisationDiagrammer(object):
         drawNetworkXEdges(e_indirect, 4, 0.8, "g", "dotted")
         drawNetworkXEdges(e_starting, 4, 0.8, "teal", "dotted")
         drawNetworkXEdges(e_leaving, 4, 0.8, "orange", "dotted")
-    
-    def draw_networkx_edge_labels(self, g: nx.DiGraph, pos: Dict, using_edge_labels: bool):
+
+    def draw_networkx_edge_labels(
+        self,
+        g: nx.DiGraph,
+        pos: Dict,
+        cstyle: str,
+        font_size: int,
+        using_edge_labels: bool,
+        edge_label_height: int,
+    ):
         """
-        Draw edge labels from NetworkX graph.
-        
+        Draw edge labels from NetworkX graph controlling position and size.
+
         **Parameters**
-        
+
         g : `nx.DiGraph`
             NetworkX graph of organisation built from yaml_data
         pos : `Dict`
             Dictionary of tuples of (x,y) positions of all nodes
+        cstyle : `str`
+            Style to use for edges.  Can be one of: ['arc','arc3','angle','angle3'].
+        font_size : `int`
+            Font size for text labels.  12 by default.
         using_edge_labels : `bool`
-            Are we using edge labels.
+            True if we are using edge labels.
+        edge_label_height : `int`
+            Edge label height if we are using edge labels.
 
         **Returns**
-       
+
         """
-        logger.info(f'OrganisationDiagrammer::draw_networkx_edge_labels() - using_edge_labels={using_edge_labels}')
+        logger.info(
+            f"OrganisationDiagrammer::draw_networkx_edge_labels() - cstyle={cstyle}, using_edge_labels={using_edge_labels}"
+        )
         # node that our edge labels are now pulled from our nodes
+        # node labels - rotate edge labels to be horizontal
+        size = font_size
         if using_edge_labels:
             edge_labels = dict(
                 [
@@ -491,53 +551,47 @@ class OrganisationDiagrammer(object):
                     for u, v, d in g.edges(data=True)
                 ]
             )
-        # node labels - rotate edge labels to be horizontal
-        if using_edge_labels:
             if cstyle in ["arc", "arc3"]:
                 text = nx.draw_networkx_edge_labels(
                     g,
                     pos,
-                    font_size=12,
+                    font_size=size,
                     edge_labels=edge_labels,
-                    label_pos=EDGE_LABEL_HEIGHT,
+                    label_pos=edge_label_height,
                 )
             elif cstyle in ["angle", "angle3"]:
                 text = nx.draw_networkx_edge_labels(
-                    g, pos, font_size=12, edge_labels=edge_labels, label_pos=0.15
+                    g, pos, font_size=size, edge_labels=edge_labels, label_pos=0.15
                 )
             for _, t in text.items():
                 t.set_rotation("horizontal")
-        nx.draw_networkx_labels(
-            g,
-            pos,
-            font_size=18,
-            font_color="w",
-            font_family="sans-serif",
-            horizontalalignment="center",
-            verticalalignment="bottom",
-        )
-        
-    def draw_networkx_text_labels(self, g: nx.DiGraph, pos: Dict, scale:int, offset: float):
+
+    def draw_networkx_text_labels(
+        self, g: nx.DiGraph, pos: Dict, font_size: int, offset: float
+    ):
         """
-        Draw text annotations from NetworkX graph.
-        
+        Draw text annotations for note and team on node cells from NetworkX graph.
+
         **Parameters**
-        
+
         g : `nx.DiGraph`
             NetworkX graph of organisation built from yaml_data
         pos : `Dict`
             Dictionary of tuples of (x,y) positions of all nodes
-        scale : `int`
-            Scale of elements in drawing.  Default is 4.
+        font_size : `int`
+            Font size for text labels.  12 by default.
         offset : `float`
             Offset for text elements.  Default is 0
-    
+
         **Returns**
-        
+
         """
-        logger.info(f'OrganisationDiagrammer::draw_networkx_text_labels() - scale={scale}, offset={offset}')
+        logger.info(
+            f"OrganisationDiagrammer::draw_networkx_text_labels() - font_size={font_size}, offset={offset}"
+        )
+
         # note labels - rotate edge labels to be horizontal
-        def drawTextField(y: float, text: str, size: float, fcolor: str="none"):
+        def drawTextField(y: float, text: str, size: float, fcolor: str = "none"):
             plt.text(
                 x,
                 y,
@@ -553,48 +607,37 @@ class OrganisationDiagrammer(object):
 
         fcolor = "none"
         ecolor = "none"
-        if offset > 0:
-            # we will force use the offset provided
-            size = (1 / scale) * 50
-        elif scale > 3:
-            offset = (1 / scale) * 35
-            size = 16
-        elif scale <= 3:
-            offset = 10
-            size = (1 / scale) * 30
-
-        for name, d in n_note:  # node note goes below the node
-            x, y = pos.get(name)
-            note = proc_field(d.get("note"), True)
-            drawTextField(y - offset, note, size, fcolor)
+        size = font_size
         for name, d in n_team:  # node team goes above the node
             x, y = pos.get(name)
             team = d.get("team")
-            drawTextField(y + offset * 2.5, team, size * 1.5, fcolor)
-        for name, d in n_jobtitle:  # node jobtitle goes below the node
+            drawTextField(y + offset * 2, team, size * 1.5, fcolor)
+        for name, d in n_note:  # node note goes inside the node
+            x, y = pos.get(name)
+            note = proc_field(d.get("note"), True)
+            drawTextField(y - offset, note, size, fcolor)
+        for name, d in n_jobtitle:  # jobtitle goes below the node
             x, y = pos.get(name)
             job = d.get("jobtitle")
-            drawTextField(y - offset * 2.5, job, size, fcolor)
-            
+            drawTextField(y - offset * 2, job, size * 1.25, fcolor)
+
     def create_graphviz_layout_from_graph(
         self,
         g: nx.DiGraph,
-        scale: int,
         cstyle: str,
         margin: float,
         offset: float,
         node_size: int,
+        font_size: int,
         image_file: str = "org.png",
     ) -> nx.DiGraph:
         """
         Create graphviz generated visualisation of organisation from NetworkX graph.
-        
+
         **Parameters**
 
         g : `nx.DiGraph`
             NetworkX graph of organisation built from yaml_data
-        scale : `int`
-            Scale of elements in drawing.  Default is 4.
         cstyle : `str`
             Style to use for edges.  Can be one of: ['arc','arc3','angle','angle3'].  Default is 'arc3'
         margin : `float`
@@ -603,32 +646,37 @@ class OrganisationDiagrammer(object):
             Offset for text elements.  Default is 0
         node_size : `int`
             Size of node.  Default is `DEFAULT_NODE_SIZE` (7000)
+        font_size : `int`
+            Size of node text
         image_file : `str`
             Target file for visualisation.  Default is `org.png`
-            
+
         **Returns**
-        
+
         g : `nx.DiGraph`
             NetworkX graph of organisation built from yaml_data
 
         """
-        logger.info(f'OrganisationDiagrammer::create_graphviz_layout_from_graph()')
+        logger.info(f"OrganisationDiagrammer::create_graphviz_layout_from_graph()")
         # Note the args here are inputs to dot.  Type dot -h to see options
         # See: https://renenyffenegger.ch/notes/tools/Graphviz/examples/organization-chart for an org chart example
         # See: https://stackoverflow.com/questions/57512155/how-to-draw-a-tree-more-beautifully-in-networkx for circo reference
         args = "-Gnodesep=3 -Granksep=0 -Gpad=0.1 -Grankdir=TB"
         pos = nx.nx_agraph.graphviz_layout(g, prog="dot", root=None, args=args)
 
-        self.draw_networkx_nodes(g, pos, margin, node_size)
+        self.draw_networkx_nodes(g, pos, margin, node_size, font_size)
         self.draw_networkx_edges(g, pos, cstyle)
         using_edge_labels = False
-        self.draw_networkx_edge_labels(g, pos, using_edge_labels)
-        self.draw_networkx_text_labels(g, pos, scale, offset)
-        
+        self.draw_networkx_edge_labels(
+            g, pos, cstyle, font_size - 4, using_edge_labels, DEFAULT_EDGE_LABEL_HEIGHT
+        )
+        self.draw_networkx_text_labels(g, pos, font_size - 4, offset)
+
         logger.info(f'saving graph to "{image_file}"')
         plt.axis("off")
         params = plt.gcf()
         plSize = params.get_size_inches()
+        scale = 5
         params.set_size_inches((plSize[0] * scale, plSize[1] * scale))
         plt.savefig(image_file, bbox_inches="tight")
         return g
@@ -645,12 +693,14 @@ class OrganisationDiagrammer(object):
             Name of target dot file to create.  eg. output.dot
 
         **Returns**
-        
+
         dot_file : `str`
-            Name of target dot file to create.  eg. output.dot        
+            Name of target dot file to create.  eg. output.dot
 
         """
-        logger.info(f'OrganisationDiagrammer::create_dotfile_from_graph() - target={dot_file}')
+        logger.info(
+            f"OrganisationDiagrammer::create_dotfile_from_graph() - target={dot_file}"
+        )
         # nx.drawing.nx_pydot is deprecated.
         # nx.drawing.nx_pydot.write_dot(g, dot_file)
         nx.nx_agraph.write_dot(g, dot_file)
@@ -674,51 +724,50 @@ if __name__ == "__main__":
         verbose = False
         style = DEFAULT_CSTYLE
         node_size = DEFAULT_NODE_SIZE
-        scale = DEFAULT_SCALE
         margin = DEFAULT_MARGIN
         offset = DEFAULT_OFFSET
+        font_size = DEFAULT_NODE_FONT_SIZE
         logger = initLogger(False)
+        target = "test.png"
+
         def setFloatValue(v, default):
             try:
                 v = float(v)
             except:
-                print(
-                    f'WARNING: Could not parse input margin, using {default}...'
-                )
+                print(f"WARNING: Could not parse input margin, using {default}...")
                 v = default
             return v
+
         if arguments.get("--verbose") or arguments.get("-v"):
             verbose = True
             logger = initLogger(verbose)
-            logger.info(f'::main() - arguments =\n{arguments}')
+            logger.info(f"::main() - arguments =\n{arguments}")
         if arguments.get("--style"):
             cstyle = arguments.get("--style")[0]
-            logger.info(f'cstyle = {cstyle}')
+            logger.info(f"cstyle = {cstyle}")
         if arguments.get("--margin"):
             margin = arguments.get("--margin")[0]
             margin = setFloatValue(margin, DEFAULT_MARGIN)
-            logger.info(f'margin = {margin}')
+            logger.info(f"margin = {margin}")
         if arguments.get("--nodesize"):
             node_size = arguments.get("--nodesize")[0]
             node_size = int(setFloatValue(node_size, DEFAULT_NODE_SIZE))
-            logger.info(f'node_size = {node_size}')
+            logger.info(f"node_size = {node_size}")
+        if arguments.get("--fontsize"):
+            font_size = arguments.get("--fontsize")[0]
+            font_size = int(setFloatValue(font_size, DEFAULT_NODE_SIZE))
+            logger.info(f"fontsize = {font_size}")
         if arguments.get("--offset"):
             offset = arguments.get("--offset")[0]
             offset = setFloatValue(offset, DEFAULT_OFFSET)
-            logger.info(f'offset = {offset}')
-        if arguments.get("--scale"):
-            scale = arguments.get("--scale")[0]
-            scale = int(setFloatValue(scale, DEFAULT_SCALE))
-            logger.info(f'scale = {scale}')
+            logger.info(f"offset = {offset}")
         if arguments.get("--source"):
             source = str(arguments.get("--source")[0])
             try:
                 assert os.path.exists(source)
-                logger.info(f'source = {source}')
+                logger.info(f"source = {source}")
             except:
-                print(
-                    f'ERROR: Could not find "{source}". Exiting...'
-                )
+                print(f'ERROR: Could not find "{source}". Exiting...')
                 sys.exit()
         if arguments.get("--version") or arguments.get("-V"):
             print(f"{PROGRAM} version {VERSION}.  Released {DATE} by {AUTHOR}")
@@ -726,19 +775,24 @@ if __name__ == "__main__":
             print(usage)
         else:
             t0 = time.time()
-            target = "test.png"
             org = OrganisationDiagrammer(margin=margin, node_size=node_size)
             data = org.load_yaml_file(source)
             g = org.create_graph_from_yaml(data)
-            target = source[:-5] + '.dot'
+            target = source[:-5] + ".dot"
             dotfile = org.create_dotfile_from_graph(g, target)
             print(
                 f"Successfully created dot file {dotfile} of size"
                 f" {get_file_size(dotfile)}kB"
             )
-            image = source[:-5] + '.png'
+            image = source[:-5] + ".png"
             org.create_graphviz_layout_from_graph(
-                g, margin=margin, cstyle=cstyle, node_size=node_size, scale=scale, offset=offset, image_file=image
+                g,
+                margin=margin,
+                cstyle=cstyle,
+                node_size=node_size,
+                offset=offset,
+                font_size=font_size,
+                image_file=image,
             )
             print(
                 f"Successfully generated organogram into file {image} of size"
@@ -746,13 +800,15 @@ if __name__ == "__main__":
             )
             Image.open(image).show()
             t1 = time.time()
-            print(f"successfully processed {source} YAML to generate {image} in {round((t1-t0),2)} seconds")
+            print(
+                f"successfully processed {source} YAML to generate {image} in {round((t1-t0),2)} seconds"
+            )
 
     usage = """
     {}
     ----------------
     Usage:
-    {} -s <source> [-m <margin>] [-n <nodesize>] [-f <style>] [-o <offset>] [-x <scale>] [-v]
+    {} -s <source> [-m <margin>] [-n <nodesize>] [-f <style>] [-o <offset>] [-x <fontsize>] [-v]
     {} -h | --help
     {} -V | --version
     Options:
@@ -763,15 +819,17 @@ if __name__ == "__main__":
     -n <nodesize>, --nodesize <nodesize>    Node size.  Default is 7000.
     -m <margin>, --margin <margin>          Margin.  Default 0.1.
     -f <style>, --style <style>             Edge style. Default is arc3.
-    -x <scale>, --scale <scale>             Scale.  Default is 4.
     -o <offset>, --offset <offset>          Offset.  Default is 0.
+    -x <fontsize>, --fontsize <fontsize>    Font size of node text.  Default is 12.
     Examples
     1. Generate verbose graphviz visualisation of test.yaml:
-    {} -s test.yaml --margin 0.2 -f angle3 -n 7500 --offset 8 -x 4 -v
-    2. Generate graphviz visualisation of homeowner.yaml:
-    {} -s homeowner.yaml --margin 0.01 -f arc -n 7500 -o 6 -x 5
+    {} -s test.yaml --margin 0.2 -f angle3 -n 7500 --offset 8 -x 16 -v
+    2. Generate graphviz visualisation of tycoon.yaml:
+    {} -s tycoon.yaml --margin 0.2 -f angle -n 15000 --offset 3 -x 18
+    3. Generate graphviz visualisation of homeowner.yaml:
+    {} -s homeowner.yaml --margin 0.01 -f arc -n 7500 -o 5 -x 14
     """.format(
-        *tuple([PROGRAM] * 6)
+        *tuple([PROGRAM] * 7)
     )
     arguments = docopt.docopt(usage)
     main(arguments)

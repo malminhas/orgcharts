@@ -4,122 +4,123 @@ nodes:
   # `status` can be: perm|contractor|starting|leaving|new
   # `note` is an optional property and should be short if present as will be concatenated to 20 chars
   # `team` is an optional property and will result in team name being shown above node
-  - id: 'Mickey Mouse'
-    level: 1
-    status: 'perm'
+  - id: Mickey Mouse
+    label: Head of Engineering
+    rank: 1
+    status: perm
     manager: 'yes'
   # Engineering Managers
-  - id: 'Donald Duck'
-    level: 2
-    status: 'leaving'
+  - id: Donald Duck
+    rank: 2
+    status: leaving
     manager: 'yes'
-    note: 'leaving 30.03.23'
-  - id: 'Daffy Duck'
-    level: 2
-    status: 'starting'
+    note: leaving 30.03.23
+    label: Engineering Manager
+  - id: Daffy Duck
+    rank: 2
+    status: starting
     manager: 'yes'
-    note: 'starting 03.04.23'
+    note: starting 03.04.23
+    label: Engineering Manager
   # Staff Engineers
-  - id: 'Pluto Dog'
-    level: 3
-    status: 'perm'
+  - id: Pluto Dog
+    rank: 3
+    status: perm
     manager: 'no'
-    team: 'Bark'
-  - id: 'Bluto Dog'
-    level: 3
-    status: 'perm'
+    team: Bark
+    label: Staff Engineer
+  - id: Bluto Dog
+    rank: 3
+    status: perm
     manager: 'yes'
-    team: 'Bite'
+    team: Bite
+    label: Staff Engineer
   # Bark Engineering
-  - id: 'Cakey Dog'
-    level: 4
-    status: 'perm'
+  - id: Cakey Dog
+    rank: 4
+    status: perm
     manager: 'no'
-    team: 'Bark'
-  - id: 'Flakey Dog'
-    level: 4
-    status: 'perm'
+    team: Bark
+    label: Senior Engineer
+  - id: Flakey Dog
+    rank: 4
+    status: perm
     manager: 'no'
-    team: 'Bark'
-  - id: 'Big Bad Dog'
-    level: 4
-    status: 'perm'
+    team: Bark
+    label: Engineer
+  - id: Big Bad Dog
+    rank: 4
+    status: perm
     manager: 'no'
-    team: 'Bark'
-  - id: 'Sean Dog'
-    level: 4
-    status: 'contractor'
+    team: Bark
+    label: Junior Engineer
+  - id: Sean Dog
+    rank: 4
+    status: contractor
     manager: 'no'
-    team: 'Bork'
-    note: 'Special Operations'
+    team: Bork
+    note: Special Operations
+    label: Contractor
   # Bite Engineering
-  - id: 'Floella Dog'
-    level: 4
-    status: 'moving'
+  - id: Floella Dog
+    rank: 4
+    status: moving
     manager: 'no'
-    note: 'moving ??.04.23'
-    team: 'Bite'
-  - id: 'Moella Dog'
-    level: 4
-    status: 'perm'
+    note: moving ??.04.23
+    team: Bite
+    label: Engineer
+  - id: Moella Dog
+    rank: 4
+    status: perm
     manager: 'no'
-    team: 'Bite'
-  - id: 'Rowenna Dog'
-    level: 4
-    status: 'perm'
+    team: Bite
+    label: Engineer
+  - id: Rowenna Dog
+    rank: 4
+    status: perm
     manager: 'no'
-    team: 'Bite'
-    
+    team: Bite
+    label: Engineer
 
 edges:
   # relationship 1 for direct management.
   # relationship 2 for indirect management. eg. tech lead
   # relationship 3 for a perm yet to join.
   # relationship 4 for a perm leaving.
-  - source: 'Mickey Mouse'
-    target: 'Donald Duck'
-    label: 'Engineering Manager'
+  - source: Mickey Mouse
+    target: Donald Duck
     relationship: 4
-  - source: 'Mickey Mouse'
-    target: 'Daffy Duck'
-    label: 'Engineering Manager'
+    label: Bark leader
+  - source: Mickey Mouse
+    target: Daffy Duck
     relationship: 3
+    label: Bite leader
   # Bark team
-  - source: 'Donald Duck'
-    target: 'Pluto Dog'
-    label: 'Staff Engineer'
+  - source: Donald Duck
+    target: Pluto Dog
     relationship: 1
-  - source: 'Pluto Dog'
-    target: 'Cakey Dog'
-    label: 'Engineer'
+  - source: Pluto Dog
+    target: Cakey Dog
     relationship: 2
-  - source: 'Pluto Dog'
-    target: 'Flakey Dog'
-    label: 'Engineer'
+  - source: Pluto Dog
+    target: Flakey Dog
     relationship: 2
-  - source: 'Pluto Dog'
-    target: 'Big Bad Dog'
-    label: 'Engineer'
+  - source: Pluto Dog
+    target: Big Bad Dog
     relationship: 2
-  - source: 'Pluto Dog'
-    target: 'Sean Dog'
-    label: 'Contractor'
+  - source: Pluto Dog
+    target: Sean Dog
     relationship: 2
   # Bite team
-  - source: 'Daffy Duck'
-    target: 'Bluto Dog'
-    label: 'Staff Engineer'
+  - source: Daffy Duck
+    target: Bluto Dog
     relationship: 1
-  - source: 'Bluto Dog'
-    target: 'Floella Dog'
-    label: 'Engineer'
+  - source: Bluto Dog
+    target: Floella Dog
     relationship: 2
-  - source: 'Bluto Dog'
-    target: 'Moella Dog'
-    label: 'Engineer'
+  - source: Bluto Dog
+    target: Moella Dog
     relationship: 2
-  - source: 'Bluto Dog'
-    target: 'Rowenna Dog'
-    label: 'Engineer'
+  - source: Bluto Dog
+    target: Rowenna Dog
     relationship: 2
-

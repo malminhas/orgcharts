@@ -128,7 +128,7 @@ def test_create_dotfile_from_graph(diagrammer):
 def test_create_graphviz_layout_from_graph(diagrammer):
     target = "test_output.png"
     graph = diagrammer.create_graph_from_yaml(yaml_data)
-    layout_graph = diagrammer.create_graphviz_layout_from_graph(graph, scale=5, cstyle='angle', margin=0.1, offset=2, node_size=10000, image_file=target)
+    layout_graph = diagrammer.create_graphviz_layout_from_graph(graph, font_size=12, cstyle='angle', margin=0.1, offset=2, node_size=10000, image_file=target)
 
     assert len(layout_graph.nodes) == 2
     assert len(layout_graph.edges) == 1
