@@ -81,7 +81,8 @@ print(f'Successfully generated organogram into file {target} of size {size}kB')
 Note the following:
 * Managers have a thick black border around their box.
 * Employees who are leaving are in orange
-* Employees who are yet to join are in teal
+* Employees who are yet to be hired are in red
+* Employees who are hired but yet to join are in teal
 * Employees who are moving to another team are in light green
 * Contractors are in grey
 * All other employees are in dark green
