@@ -39,7 +39,7 @@ from organogram import OrganisationDiagrammer
 target = 'tycoon.png'
 org = OrganisationDiagrammer()
 g2 = org.create_graph_from_yaml(org.load_yaml_file('tycoon.yaml'),newline=True)
-org.create_graphviz_layout_from_graph(g2, scale=3, cstyle='angle', offset=3, node_size=10000, image_file=target)
+org.create_graphviz_layout_from_graph(g2, font_size=16, cstyle='angle', offset=3, node_size=10000, image_file=target)
 print(f'Successfully generated organogram into file {target} of size {round(os.path.getsize(target)/1024,1)}kB')
 ```
 This generates the following inline image in the notebook:
@@ -73,7 +73,7 @@ import os
 from organogram import OrganisationDiagrammer
 
 target = 'test.png'
-org.create_graphviz_layout_from_graph(g, scale=4, cstyle='arc', node_size=12000, image_file=target)
+org.create_graphviz_layout_from_graph(g, font_size=16, cstyle='arc', node_size=12000, image_file=target)
 size = os.path.getsize(target)/1024
 print(f'Successfully generated organogram into file {target} of size {size}kB')
 ```
