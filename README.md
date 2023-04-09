@@ -109,7 +109,8 @@ Run the test code from the same directory with coverage as follows:
 ```
 $ pytest --exitfirst --failed-first --cov=. --cov-report html -vv
 ```
-### Tests
+
+### Documentation
 Run the Sphinx documentation as follows:
 ```
 $ cd docs
