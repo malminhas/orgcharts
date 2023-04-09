@@ -75,7 +75,8 @@ yaml_data_none = {
         }
     ]
 }
-
+yaml_data_zero = {
+}
 
 # ---- TESTS -----
 
@@ -98,14 +99,14 @@ def test_create_graph_from_yaml(diagrammer):
 def test_create_valid_teams_and_status(diagrammer):
     validTeams = ['Team A', 'Team B']
     validStatus = ['perm']
-    diagrammer.setValidTeams(validTeams)
-    diagrammer.setValidStatus(validStatus)
-    assert(diagrammer.validTeams == validTeams)
-    assert(diagrammer.validStatus == validStatus)
+    diagrammer.set_valid_teams(validTeams)
+    diagrammer.set_valid_status(validStatus)
+    assert(diagrammer.valid_teams == validTeams)
+    assert(diagrammer.valid_status == validStatus)
            
 def test_create_graph_from_yaml_validate(diagrammer):
-    diagrammer.setValidTeams(['Team A', 'Team B'])
-    diagrammer.setValidStatus(['perm'])
+    diagrammer.set_valid_teams(['Team A', 'Team B'])
+    diagrammer.set_valid_status(['perm'])
     graph = diagrammer.create_graph_from_yaml(yaml_data, validate=True)
 
     assert len(graph.nodes) == 2
@@ -127,7 +128,7 @@ def test_create_dotfile_from_graph(diagrammer):
 def test_create_graphviz_layout_from_graph(diagrammer):
     target = "test_output.png"
     graph = diagrammer.create_graph_from_yaml(yaml_data)
-    layout_graph = diagrammer.create_graphviz_layout_from_graph(graph, scale=5, cstyle='angle', offset=2, node_size=10000, image_file=target)
+    layout_graph = diagrammer.create_graphviz_layout_from_graph(graph, scale=5, cstyle='angle', margin=0.1, offset=2, node_size=10000, image_file=target)
 
     assert len(layout_graph.nodes) == 2
     assert len(layout_graph.edges) == 1
@@ -138,6 +139,13 @@ def test_create_graphviz_layout_from_graph(diagrammer):
     assert isinstance(size, int)
     assert size > 0
 
+def test_load_yaml_file_zero(diagrammer):
+    yaml_file = "example_zero.yaml"
+    with open(yaml_file, 'w') as f:
+        f.write(yaml.dump(yaml_data_zero))
+    loaded_data = diagrammer.load_yaml_file(yaml_file)
+    assert loaded_data == yaml_data_zero
+    
 def test_load_yaml_file_none(diagrammer):
     yaml_file = "example_none.yaml"
     with open(yaml_file, 'w') as f:
@@ -168,8 +176,8 @@ def test_create_graph_from_yaml_mini(diagrammer):
     assert graph.has_edge(proc_field("A"), proc_field("B"))
 
 def test_create_graph_from_yaml_mini_validate(diagrammer):
-    diagrammer.setValidTeams(['Team A', 'Team B'])
-    diagrammer.setValidStatus(['perm'])
+    diagrammer.set_valid_teams(['Team A', 'Team B'])
+    diagrammer.set_valid_status(['perm'])
     graph = diagrammer.create_graph_from_yaml(yaml_data_mini, validate=True)
 
     assert len(graph.nodes) == 2

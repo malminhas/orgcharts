@@ -1,200 +1,777 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+#
+# cat-reviews.py
+# --------------
+# (c) 2023 Mal Minhas, <mal.minhas@checkatrade.com>
+#
+# Description
+# -----------
+# Organisation Diagrammer which can be used to allow you to store an organisation structure in code as YAML
+# and optionally generate a .dot file representation of it or a graphviz visualisation
+#
+# Installation:
+# -------------
+# pip install -r requirements.txt
+# You will also need to install graphviz.  You can do this via Homebrew on your Mac
+#
+# Implementation:
+# --------------
+# There is one class in this module:
+# OrganisationDiagrammer - ingests a YAML organisation file and converts it to:
+# a) dot representation, b) graphviz visualisation
+#
+# Documentation:
+# -------------
+# See: https://betterprogramming.pub/auto-documenting-a-python-project-using-sphinx-8878f9ddc6e9
+# $ pip install Sphinx
+# $ mkdir docs
+# $ cd docs                       => all the following happens in the docs directory
+# $ sphinx-quickstart             => creates a Makefile, a make.bat file, as well as build and source directories.
+# $ cd source                     => edit the conf.py file
+# $ pip install sphinx-rtd-theme  => if this theme has been chosen
+# $ cd ..                         => back to docs directory
+# $ sphinx-apidoc -o source ..    => generates index.rst and cat-review.rst files into source directory
+# $ make html
+# $ open html/index.html
+#
+# History:
+# -------
+# 02.04.23    v0.1    First working version with graphviz and dot support
+# 08.04.23    v0.2    Added CLI, logging, type support, ran through black and added initial Sphinx support
+# 09.04.23    v0.3    Enhanced CLI
+#
+# ToDo:
+# -------
+# 1. Add support to ingest organisation input data from csv or xlsx file
+#
+"""
+Welcome to organogram.py module!
+This module has one main class:
+* `OrganisationDiagrammer`
+"""
+
 import os
+import sys
+import time
 import yaml
-import networkx as nx
-from PIL import Image    
-import matplotlib.pyplot as plt
+import logging
+import docopt
+from logging import Logger
+from typing import List, Dict, Any, Optional
+import networkx as nx  # type: ignore
+from PIL import Image
+import matplotlib.pyplot as plt  # type: ignore
 
-VALID_STATUS = ['perm','contractor','starting','leaving','moving','new']
-VALID_TEAM = ['Reviews','Jobs Board','Jobs Mgmt','HEX','Search','Octo']
-VALID_RELATION = [1,2,3,4]
-NODE_SIZE = 7000
-EDGE_LABEL_HEIGHT = 0.3
+PROGRAM = __file__.split("/")[-1]
+VERSION = "0.3"
+DATE = "09.04.23"
+AUTHOR = "<mal.minhas@checkatrade.com>"
 
-def split_line(val):
+VALID_STATUS = ["perm", "contractor", "starting", "leaving", "moving", "new"]
+VALID_TEAM = ["A", "B", "C", "D", "E", "F"]
+VALID_RELATION = [1, 2, 3, 4]
+
+DEFAULT_NODE_SIZE = 7000
+DEFAULT_MARGIN = 0.1
+DEFAULT_CSTYLE = 'arc3'
+DEFAULT_SCALE = 4
+DEFAULT_OFFSET = 1
+DEFAULT_EDGE_LABEL_HEIGHT = 0.3
+
+
+def initLogger(verbose: bool) -> Logger:
+    """
+    Initialise standard Python console logging.
+
+    **Parameters**
+
+    verbose : `bool`
+        Enable/disable logging
+
+    **Returns**
+
+    logger : `Logger`
+        logger instance
+
+    """
+    if verbose:
+        logging.basicConfig(
+            level=logging.INFO, format="%(asctime)s :: %(levelname)s :: %(message)s"
+        )
+        logger = logging.getLogger(__name__)
+        logger.setLevel(logging.INFO)
+    else:
+        # this will silence all logging including from modules
+        logger = logging.getLogger(__name__)
+        logger.addHandler(logging.FileHandler(os.devnull))
+    return logger
+
+
+# By default when we import organogram we turn the logger off
+"""
+When we import organogram we turn the logger off.
+"""
+logger = initLogger(False)
+
+
+def get_file_size(filename: str) -> float:
+    """
+    Get file size in kB.
+
+    **Parameters**
+
+    filename : `str`
+        filename
+
+    **Returns**
+
+    file_size : `int`
+        size of file in kB rounded to 2 decimal places.
+
+    """
+    file_size = round(os.path.getsize(filename) / 1024, 2)
+    return file_size
+
+
+def split_line(val: str) -> str:
+    """
+    Split the input string on first 
+
+    **Parameters**
+
+    val : `str`
+        input string to split
+
+    **Returns**
+
+    val : `str`
+        output string with newline in first whitespace.
+
+    """
     if val:
-        val = '\n'.join(val.split(' ',1))
+        val = "\n".join(val.split(" ", 1))
     return val
 
-def proc_field(val, newline=False, upper=False):
+
+def proc_field(val: str, newline: bool = False, upper: bool = False) -> str:
+    inputval = val
     if val:
         if newline:
-            val = '\n'.join(val.split(' ',1))
+            val = "\n".join(val.split(" ", 1))
         if upper:
             val = val.upper()
     else:
-        val = ''
+        val = ""
+    logger.info(f'::proc_field() - converting {repr(inputval)} to {repr(val)}')
     return val
 
+
 class OrganisationDiagrammer(object):
-    def __init__(self):
+    def __init__(self, node_size: int=DEFAULT_NODE_SIZE, margin: float=DEFAULT_MARGIN, cstyle: str=DEFAULT_CSTYLE, scale: int=DEFAULT_SCALE, offset: int=DEFAULT_OFFSET):
+        """
+        Constructor method. Creates a :py:class: `OrganisationDiagrammer` instance
+        """
+        logger.info(f'OrganisationDiagrammer::__init__() - constructor')
         self._graph = None
+        self._node_size = node_size
+        self._margin = margin
+        self._cstyle = cstyle
+        self._scale = scale
+        self._offset = offset
         self._validTeams = VALID_TEAM
         self._validStatus = VALID_STATUS
         self._validRelations = VALID_RELATION
 
     @property
-    def validTeams(self):
-        return self._validTeams
+    def valid_teams(self) -> List:
+        """
+        Return valid teams 
         
-    def setValidTeams(self, teams):
-        assert(isinstance(teams, list))
+        **Parameters**
+
+        **Returns**
+        
+        validTeams : `List`
+            list of current valid teams. eg. ["A", "B", "C", "D", "E", "F"]
+        
+        """
+        return self._validTeams
+
+    def set_valid_teams(self, teams: List):
+        """
+        Set valid teams list
+        
+        **Parameters**
+        
+        teams : `List`
+            list of valid teams. eg. "A", "B", "C", "D", "E", "F"]
+
+        **Returns**
+
+        """
+        assert isinstance(teams, list)
+        logger.info(f'OrganisationDiagrammer::set_valid_teams() - setting valid teams to "{teams}"')
         self._validTeams = teams
 
     @property
-    def validStatus(self):
+    def valid_status(self) -> List:
+        """
+        Return valid statuses 
+        
+        **Parameters**
+
+        **Returns**
+        
+        validStatus : `List`
+            list of current valid statuses. eg. ["perm", "contractor","new"]
+        
+        """
         return self._validStatus
 
-    def setValidStatus(self, status):
-        assert(isinstance(status, list))
+    def set_valid_status(self, status):
+        """
+        Set valid status list
+        
+        **Parameters**
+        
+        status : `List`
+            list of valid status. eg. ["perm", "contractor","new"]
+
+        **Returns**
+
+        """
+        assert isinstance(status, list)
+        logger.info(f'OrganisationDiagrammer::set_valid_status() - setting valid status to "{status}"')
         self._validStatus = status
 
     @property
-    def validRelations(self):
+    def valid_elations(self) -> List:
+        """
+        Return valid relations 
+        
+        **Parameters**
+
+        **Returns**
+        
+        validRelations : `List`
+            list of current valid relations. eg. [1,2,3,4]
+        
+        """
         return self._validRelations
 
-    def setValidRelations(self, relation):
-        assert(isinstance(relation, list))
-        self._validRelations = relation
+    def set_valid_relations(self, relations: List):
+        """
+        Set valid relations list
         
-    def load_yaml_file(self, file_path):
-        with open(file_path, 'r') as file:
+        **Parameters**
+        
+        relation : `List`
+            list of valid relations. eg. [1,2,3,4]
+
+        **Returns**
+
+        """
+        assert isinstance(relations, list)
+        logger.info(f'OrganisationDiagrammer::set_valid_relations() - setting valid relations to "{relations}"')
+        self._validRelations = relations
+
+    def load_yaml_file(self, file_path: str) -> Dict[Optional[Any],Optional[Any]]:
+        """
+        Load YAML organisation configuration file and convert to Dict
+        
+        **Parameters**
+        
+        file_path : `str`
+            name of YAML file
+
+        **Returns**
+        
+        data : `Dict`
+            dictionary of `nodes` and `edges`
+
+        """
+        logger.info(f'OrganisationDiagrammer::load_yaml_file() - loading YAML from "{file_path}"')
+        with open(file_path, "r") as file:
             data = yaml.safe_load(file)
         return data
 
-    def create_graph_from_yaml(self, yaml_data, newline=True, validate=False):
+    def create_graph_from_yaml(
+        self, yaml_data: Dict, newline: bool = True, validate: bool = False
+    ) -> nx.DiGraph:
+        """
+        Create NetworkX graph from YAML data.
+        
+        **Parameters**
+        
+        yaml_data : `Dict`
+            dictionary of `nodes` and `edges`
+        newline : `bool`
+            newline or not
+            
+        validate : `bool`
+            validate teams, statuses, relations or not.
+
+        **Returns**
+        
+        g : `nx.DiGraph`
+            NetworkX graph of organisation built from yaml_data
+
+        """
+        logger.info(f'OrganisationDiagrammer::create_graph_from_yaml() - newline={newline},  validate={validate}')
         g = nx.DiGraph()
-        for node in yaml_data['nodes']:
-            name = proc_field(node.get('id'), newline)
-            note = proc_field(node.get('note'))
-            team = proc_field(node.get('team'))
-            job = proc_field(node.get('label'))
-            rank = proc_field(node.get('rank'))
-            manager = proc_field(node.get('manager'))
+        for node in yaml_data["nodes"]:
+            name = proc_field(node.get("id"), newline)
+            note = proc_field(node.get("note"))
+            team = proc_field(node.get("team"))
+            job = proc_field(node.get("label"))
+            rank = proc_field(node.get("rank"))
+            manager = proc_field(node.get("manager"))
             if team:
                 if validate:
-                    assert(team in self._validTeams)
+                    assert team in self._validTeams
                 team = proc_field(team, newline, upper=True)
-            status = node.get('status')
+            status = node.get("status")
             if validate and status:
-                assert(status in self._validStatus)
+                assert status in self._validStatus
             if name:
-                g.add_node(name, rank=rank, jobtitle=job, status=status, manager=manager, note=note, team=team)
-        for edge in yaml_data['edges']:
-            source = proc_field(edge.get('source'), newline)
-            target = proc_field(edge.get('target'), newline)
-            label = proc_field(edge.get('label'))
-            relation = proc_field(edge.get('relationship'))
+                g.add_node(
+                    name,
+                    rank=rank,
+                    jobtitle=job,
+                    status=status,
+                    manager=manager,
+                    note=note,
+                    team=team,
+                )
+        for edge in yaml_data["edges"]:
+            source = proc_field(edge.get("source"), newline)
+            target = proc_field(edge.get("target"), newline)
+            label = proc_field(edge.get("label"))
+            relation = proc_field(edge.get("relationship"))
             if validate:
-                assert(relation in self._validRelations)
+                assert relation in self._validRelations
             if source:
                 g.add_edge(source, target, label=label, relationship=relation)
         return g
 
-    def create_graphviz_layout_from_graph(self, g, scale=4, cstyle='arc3', margin=0.1, offset=None, node_size=NODE_SIZE, image_file='org.png'):
+    def draw_networkx_nodes(self, g: nx.DiGraph, pos: Dict, margin: float, node_size: int):
+        """
+        Draw nodes from NetworkX graph.
+        
+        **Parameters**
+        
+        g : `nx.DiGraph`
+            NetworkX graph of organisation built from yaml_data
+        pos : `Dict`
+            Dictionary of tuples of (x,y) positions of all nodes
+        margin : `float`
+            Margin between nodes.  Default is 0.1
+        node_size : `int`
+            Size of node.  Default is `DEFAULT_NODE_SIZE` (7000)
+
+        **Returns**
+
+        """
+        logger.info(f'OrganisationDiagrammer::draw_networkx_nodes() - margin={margin}, node_size={node_size}, pos=\n{pos}')
+        # Pull out the different status cohorts for nodes
+        # status can be: perm|contractor|starter|joining|leaving
+        n_perm = [(u) for (u, d) in g.nodes(data=True) if d.get("status") == "perm"]
+        n_contractor = [
+            (u) for (u, d) in g.nodes(data=True) if d["status"] == "contractor"
+        ]
+        n_all = [(u) for (u, d) in g.nodes(data=True)]
+        n_starting = [(u) for (u, d) in g.nodes(data=True) if d.get("status") == "starting"]
+        n_leaving = [(u) for (u, d) in g.nodes(data=True) if d.get("status") == "leaving"]
+        n_moving = [(u) for (u, d) in g.nodes(data=True) if d.get("status") == "moving"]
+        n_new = [(u) for (u, d) in g.nodes(data=True) if d.get("status") == "new"]
+        n_manager = [(u) for (u, d) in g.nodes(data=True) if d.get("manager") == "yes"]
+        
+        # nodes - see: https://matplotlib.org/stable/api/markers_api.html#module-matplotlib.markers
+        # colors - see: https://matplotlib.org/stable/gallery/color/named_colors.html
+        def drawNetworkXNodes(
+            nlist: List, color: str, lwidth: Any = None, ecolors: Any = None
+        ):
+            nx.draw_networkx_nodes(
+                g,
+                pos,
+                node_shape="s",
+                margins=margin,
+                nodelist=nlist,
+                node_color=color,
+                linewidths=lwidth,
+                edgecolors=ecolors,
+                node_size=node_size,
+            )
+
+        drawNetworkXNodes(n_all, "green")
+        drawNetworkXNodes(n_leaving, "orange")
+        drawNetworkXNodes(n_starting, "teal")
+        drawNetworkXNodes(n_moving, "yellowgreen")
+        drawNetworkXNodes(n_contractor, "grey")
+        drawNetworkXNodes(n_manager, "none", 5.0, "black")
+        
+    def draw_networkx_edges(self, g: nx.DiGraph, pos: Dict, cstyle: str):
+        """
+        Draw edges from NetworkX graph.
+        
+        **Parameters**
+        
+        g : `nx.DiGraph`
+            NetworkX graph of organisation built from yaml_data
+        pos : `Dict`
+            Dictionary of tuples of (x,y) positions of all nodes
+        style : `str`
+            Style to use for edges.  Can be one of: ['arc','arc3','angle','angle3'].
+
+        **Returns**
+
+        """
+        logger.info(f'OrganisationDiagrammer::draw_networkx_edges() - cstyle={cstyle}')
         # 1. Pull out the different relationships for edges
         # Can be 1 for direct management, 2 for indirect management, 3 for a perm yet to join, 4 for a perm leaving.
-        e_direct = [(u, v) for (u, v, d) in g.edges(data=True) if d['relationship'] == 1 ]
-        e_indirect = [(u, v) for (u, v, d) in g.edges(data=True) if d['relationship'] == 2 ]
-        e_starting = [(u, v) for (u, v, d) in g.edges(data=True) if d['relationship'] == 3 ]
-        e_leaving = [(u, v) for (u, v, d) in g.edges(data=True) if d['relationship'] == 4 ]
+        e_direct = [
+            (u, v) for (u, v, d) in g.edges(data=True) if d.get("relationship") == 1
+        ]
+        e_indirect = [
+            (u, v) for (u, v, d) in g.edges(data=True) if d.get("relationship") == 2
+        ]
+        e_starting = [
+            (u, v) for (u, v, d) in g.edges(data=True) if d.get("relationship") == 3
+        ]
+        e_leaving = [
+            (u, v) for (u, v, d) in g.edges(data=True) if d.get("relationship") == 4
+        ]
+        # styles - see: https://matplotlib.org/stable/api/_as_gen/matplotlib.patches.Patch.html#matplotlib.patches.Patch.set_linestyle
+        def drawNetworkXEdges(elist: List, w: int, a: float, color: str, style: str):
+            nx.draw_networkx_edges(
+                g,
+                pos,
+                connectionstyle=cstyle,
+                edgelist=elist,
+                width=w,
+                alpha=a,
+                edge_color=color,
+                style=style,
+            )
 
-        # 2. Pull out the different status cohorts for nodes
-        # status can be: perm|contractor|starter|joining|leaving
-        n_perm = [(u) for (u, d) in g.nodes(data=True) if d['status'] == 'perm' ]
-        n_contractor = [(u) for (u, d) in g.nodes(data=True) if d['status'] == 'contractor' ]
-        n_starting = [(u) for (u, d) in g.nodes(data=True) if d['status'] == 'starting' ]
-        n_leaving = [(u) for (u, d) in g.nodes(data=True) if d['status'] == 'leaving' ]
-        n_moving = [(u) for (u, d) in g.nodes(data=True) if d['status'] == 'moving' ]
-        n_new = [(u) for (u, d) in g.nodes(data=True) if d['status'] == 'new' ]
-        n_manager = [(u) for (u, d) in g.nodes(data=True) if d['manager'] == 'yes' ]
-        n_note = [(u, d) for (u, d) in g.nodes(data=True) if d.get('note') ]
-        n_team = [(u, d) for (u, d) in g.nodes(data=True) if d.get('team') ]
-        n_jobtitle = [(u, d) for (u, d) in g.nodes(data=True) if d.get('jobtitle') ]
+        drawNetworkXEdges(e_direct, 4, 0.8, "g", "solid")
+        drawNetworkXEdges(e_indirect, 4, 0.8, "g", "dotted")
+        drawNetworkXEdges(e_starting, 4, 0.8, "teal", "dotted")
+        drawNetworkXEdges(e_leaving, 4, 0.8, "orange", "dotted")
+    
+    def draw_networkx_edge_labels(self, g: nx.DiGraph, pos: Dict, using_edge_labels: bool):
+        """
+        Draw edge labels from NetworkX graph.
+        
+        **Parameters**
+        
+        g : `nx.DiGraph`
+            NetworkX graph of organisation built from yaml_data
+        pos : `Dict`
+            Dictionary of tuples of (x,y) positions of all nodes
+        using_edge_labels : `bool`
+            Are we using edge labels.
 
-        using_edge_labels = False
+        **Returns**
+       
+        """
+        logger.info(f'OrganisationDiagrammer::draw_networkx_edge_labels() - using_edge_labels={using_edge_labels}')
         # node that our edge labels are now pulled from our nodes
         if using_edge_labels:
-            edge_labels=dict([((u,v,),d['label']) for u,v,d in g.edges(data=True)])
- 
-        # Note the args here are inputs to dot.  Type dot -h to see options
-        # See: https://renenyffenegger.ch/notes/tools/Graphviz/examples/organization-chart for an org chart example
-        # See: https://stackoverflow.com/questions/57512155/how-to-draw-a-tree-more-beautifully-in-networkx for circo reference
-        args = '-Gnodesep=3 -Granksep=0 -Gpad=0.1 -Grankdir=TB'
-        pos = nx.nx_agraph.graphviz_layout(g, prog='dot', root=None, args=args)
-
-        # nodes - see: https://matplotlib.org/stable/api/markers_api.html#module-matplotlib.markers
-        # colors - see: https://matplotlib.org/stable/gallery/color/named_colors.html
-        nx.draw_networkx_nodes(g, pos, node_shape='s', margins=margin, node_color='green', node_size=node_size) # box common to all
-        nx.draw_networkx_nodes(g, pos, node_shape='s', margins=margin, nodelist=n_leaving, node_color='orange', node_size=node_size) # overlay for leavers
-        nx.draw_networkx_nodes(g, pos, node_shape='s', margins=margin, nodelist=n_starting, node_color='teal', node_size=node_size) # overlay for new starters
-        nx.draw_networkx_nodes(g, pos, node_shape='s', margins=margin, nodelist=n_moving, node_color='yellowgreen', node_size=node_size) # overlay for movers
-        nx.draw_networkx_nodes(g, pos, node_shape='s', margins=margin, nodelist=n_contractor, node_color='grey', node_size=node_size) # overlay for new starters
-        nx.draw_networkx_nodes(g, pos, node_shape='s', margins=margin, nodelist=n_manager, node_color='none', linewidths=5.0, edgecolors='black', node_size=node_size) # overlay for managers
-
-        # edges
-        # styles - see: https://matplotlib.org/stable/api/_as_gen/matplotlib.patches.Patch.html#matplotlib.patches.Patch.set_linestyle
-        nx.draw_networkx_edges(g, pos, connectionstyle=cstyle, edgelist=e_direct, width=4, alpha=0.8, edge_color='g', style='solid')
-        nx.draw_networkx_edges(g, pos, connectionstyle=cstyle, edgelist=e_indirect, width=4, alpha=0.8, edge_color='g', style='dotted')
-        nx.draw_networkx_edges(g, pos, connectionstyle=cstyle, edgelist=e_starting, width=4, alpha=0.8, edge_color='teal', style='dotted')
-        nx.draw_networkx_edges(g, pos, connectionstyle=cstyle, edgelist=e_leaving, width=4, alpha=0.8, edge_color='orange', style='dotted')
-
+            edge_labels = dict(
+                [
+                    (
+                        (
+                            u,
+                            v,
+                        ),
+                        d.get("label"),
+                    )
+                    for u, v, d in g.edges(data=True)
+                ]
+            )
         # node labels - rotate edge labels to be horizontal
         if using_edge_labels:
-            if cstyle in ['arc','arc3']:
-                text = nx.draw_networkx_edge_labels(g, pos, font_size=12, edge_labels=edge_labels, label_pos=EDGE_LABEL_HEIGHT)
-            elif cstyle in ['angle','angle3']: 
-                text = nx.draw_networkx_edge_labels(g, pos, font_size=12, edge_labels=edge_labels, label_pos=0.15)
+            if cstyle in ["arc", "arc3"]:
+                text = nx.draw_networkx_edge_labels(
+                    g,
+                    pos,
+                    font_size=12,
+                    edge_labels=edge_labels,
+                    label_pos=EDGE_LABEL_HEIGHT,
+                )
+            elif cstyle in ["angle", "angle3"]:
+                text = nx.draw_networkx_edge_labels(
+                    g, pos, font_size=12, edge_labels=edge_labels, label_pos=0.15
+                )
             for _, t in text.items():
-                t.set_rotation('horizontal')
-        nx.draw_networkx_labels(g, pos, font_size=18, font_color='w', font_family='sans-serif', horizontalalignment='center', verticalalignment='bottom')
-
+                t.set_rotation("horizontal")
+        nx.draw_networkx_labels(
+            g,
+            pos,
+            font_size=18,
+            font_color="w",
+            font_family="sans-serif",
+            horizontalalignment="center",
+            verticalalignment="bottom",
+        )
+        
+    def draw_networkx_text_labels(self, g: nx.DiGraph, pos: Dict, scale:int, offset: float):
+        """
+        Draw text annotations from NetworkX graph.
+        
+        **Parameters**
+        
+        g : `nx.DiGraph`
+            NetworkX graph of organisation built from yaml_data
+        pos : `Dict`
+            Dictionary of tuples of (x,y) positions of all nodes
+        scale : `int`
+            Scale of elements in drawing.  Default is 4.
+        offset : `float`
+            Offset for text elements.  Default is 0
+    
+        **Returns**
+        
+        """
+        logger.info(f'OrganisationDiagrammer::draw_networkx_text_labels() - scale={scale}, offset={offset}')
         # note labels - rotate edge labels to be horizontal
-        fcolor = 'none'
-        ecolor = 'none'
-        if offset:
-            # we will force use the offset provided
-            size = (1/scale)*50
+        def drawTextField(y: float, text: str, size: float, fcolor: str="none"):
+            plt.text(
+                x,
+                y,
+                s=text,
+                size=size,
+                bbox=dict(facecolor=fcolor, edgecolor=ecolor, alpha=0.5),
+                horizontalalignment="center",
+            )
+
+        n_note = [(u, d) for (u, d) in g.nodes(data=True) if d.get("note")]
+        n_team = [(u, d) for (u, d) in g.nodes(data=True) if d.get("team")]
+        n_jobtitle = [(u, d) for (u, d) in g.nodes(data=True) if d.get("jobtitle")]
+
+        fcolor = "none"
+        ecolor = "none"
+        if offset > 0:
+            # we will force use the offset provided
+            size = (1 / scale) * 50
         elif scale > 3:
-            offset = (1/scale) * 35
+            offset = (1 / scale) * 35
             size = 16
         elif scale <= 3:
             offset = 10
-            size = (1/scale)*30
+            size = (1 / scale) * 30
+
+        for name, d in n_note:  # node note goes below the node
+            x, y = pos.get(name)
+            note = proc_field(d.get("note"), True)
+            drawTextField(y - offset, note, size, fcolor)
+        for name, d in n_team:  # node team goes above the node
+            x, y = pos.get(name)
+            team = d.get("team")
+            drawTextField(y + offset * 2.5, team, size * 1.5, fcolor)
+        for name, d in n_jobtitle:  # node jobtitle goes below the node
+            x, y = pos.get(name)
+            job = d.get("jobtitle")
+            drawTextField(y - offset * 2.5, job, size, fcolor)
             
-        for (name, d) in n_note:  # node note goes below the node
-            x,y = pos.get(name)
-            note = proc_field(d.get('note'), True)
-            plt.text(x, y-offset, s=note, size=size, bbox=dict(facecolor='none', edgecolor=ecolor, alpha=0.5), horizontalalignment='center')
-        for (name, d) in n_team:  # node team goes above the node
-            x,y = pos.get(name)
-            team = d.get('team')
-            plt.text(x, y+offset*2.5, s=team, size=size*1.5, bbox=dict(facecolor=fcolor, edgecolor=ecolor, alpha=0.5), horizontalalignment='center')
-        for (name, d) in n_jobtitle:  # node jobtitle goes below the node
-            x,y = pos.get(name)
-            job = d.get('jobtitle')
-            plt.text(x, y-offset*2.5, s=job, size=size, bbox=dict(facecolor=fcolor, edgecolor=ecolor, alpha=0.5), horizontalalignment='center')
+    def create_graphviz_layout_from_graph(
+        self,
+        g: nx.DiGraph,
+        scale: int,
+        cstyle: str,
+        margin: float,
+        offset: float,
+        node_size: int,
+        image_file: str = "org.png",
+    ) -> nx.DiGraph:
+        """
+        Create graphviz generated visualisation of organisation from NetworkX graph.
+        
+        **Parameters**
+
+        g : `nx.DiGraph`
+            NetworkX graph of organisation built from yaml_data
+        scale : `int`
+            Scale of elements in drawing.  Default is 4.
+        cstyle : `str`
+            Style to use for edges.  Can be one of: ['arc','arc3','angle','angle3'].  Default is 'arc3'
+        margin : `float`
+            Margin between nodes.  Default is 0.1
+        offset : `float`
+            Offset for text elements.  Default is 0
+        node_size : `int`
+            Size of node.  Default is `DEFAULT_NODE_SIZE` (7000)
+        image_file : `str`
+            Target file for visualisation.  Default is `org.png`
             
-        plt.axis('off')
+        **Returns**
+        
+        g : `nx.DiGraph`
+            NetworkX graph of organisation built from yaml_data
+
+        """
+        logger.info(f'OrganisationDiagrammer::create_graphviz_layout_from_graph()')
+        # Note the args here are inputs to dot.  Type dot -h to see options
+        # See: https://renenyffenegger.ch/notes/tools/Graphviz/examples/organization-chart for an org chart example
+        # See: https://stackoverflow.com/questions/57512155/how-to-draw-a-tree-more-beautifully-in-networkx for circo reference
+        args = "-Gnodesep=3 -Granksep=0 -Gpad=0.1 -Grankdir=TB"
+        pos = nx.nx_agraph.graphviz_layout(g, prog="dot", root=None, args=args)
+
+        self.draw_networkx_nodes(g, pos, margin, node_size)
+        self.draw_networkx_edges(g, pos, cstyle)
+        using_edge_labels = False
+        self.draw_networkx_edge_labels(g, pos, using_edge_labels)
+        self.draw_networkx_text_labels(g, pos, scale, offset)
+        
+        logger.info(f'saving graph to "{image_file}"')
+        plt.axis("off")
         params = plt.gcf()
         plSize = params.get_size_inches()
-        params.set_size_inches( (plSize[0]*scale, plSize[1]*scale) )
+        params.set_size_inches((plSize[0] * scale, plSize[1] * scale))
         plt.savefig(image_file, bbox_inches="tight")
         return g
 
-    def create_dotfile_from_graph(self, g, dot_file):
-        ''' Need to pip install pydot for this '''
+    def create_dotfile_from_graph(self, g: nx.DiGraph, dot_file: str) -> str:
+        """
+        Create dotfile from NetworkX graph.
+
+        **Parameters**
+
+        g : `nx.DiGraph`
+            NetworkX graph of organisation built from yaml_data
+        dot_file : `str`
+            Name of target dot file to create.  eg. output.dot
+
+        **Returns**
+        
+        dot_file : `str`
+            Name of target dot file to create.  eg. output.dot        
+
+        """
+        logger.info(f'OrganisationDiagrammer::create_dotfile_from_graph() - target={dot_file}')
         # nx.drawing.nx_pydot is deprecated.
-        #nx.drawing.nx_pydot.write_dot(g, dot_file)  
+        # nx.drawing.nx_pydot.write_dot(g, dot_file)
         nx.nx_agraph.write_dot(g, dot_file)
         return dot_file
 
-if __name__ == '__main__':
-    target = 'test.png'
-    org = OrganisationDiagrammer()
-    data = org.load_yaml_file('test.yaml')
-    g = org.create_graph_from_yaml(data)
-    dotfile = org.create_dotfile_from_graph(g,'test.dot')
-    print(f'Successfully created dot file {dotfile} of size {os.path.getsize(dotfile)/1024}kB')
-    org.create_graphviz_layout_from_graph(g, scale=4, cstyle='arc', node_size=12000, image_file=target)
-    print(f'Successfully generated organogram into file {target} of size {os.path.getsize(target)/1024}kB')
-    f = Image.open(target).show()
+
+if __name__ == "__main__":
+
+    def main(arguments: Dict):
+        """
+        main entry point for CLI.
+
+        **Parameters**
+
+        arguments : `Dict`
+            Input arguments
+
+        **Returns**
+
+        """
+        verbose = False
+        style = DEFAULT_CSTYLE
+        node_size = DEFAULT_NODE_SIZE
+        scale = DEFAULT_SCALE
+        margin = DEFAULT_MARGIN
+        offset = DEFAULT_OFFSET
+        logger = initLogger(False)
+        def setFloatValue(v, default):
+            try:
+                v = float(v)
+            except:
+                print(
+                    f'WARNING: Could not parse input margin, using {default}...'
+                )
+                v = default
+            return v
+        if arguments.get("--verbose") or arguments.get("-v"):
+            verbose = True
+            logger = initLogger(verbose)
+            logger.info(f'::main() - arguments =\n{arguments}')
+        if arguments.get("--style"):
+            cstyle = arguments.get("--style")[0]
+            logger.info(f'cstyle = {cstyle}')
+        if arguments.get("--margin"):
+            margin = arguments.get("--margin")[0]
+            margin = setFloatValue(margin, DEFAULT_MARGIN)
+            logger.info(f'margin = {margin}')
+        if arguments.get("--nodesize"):
+            node_size = arguments.get("--nodesize")[0]
+            node_size = int(setFloatValue(node_size, DEFAULT_NODE_SIZE))
+            logger.info(f'node_size = {node_size}')
+        if arguments.get("--offset"):
+            offset = arguments.get("--offset")[0]
+            offset = setFloatValue(offset, DEFAULT_OFFSET)
+            logger.info(f'offset = {offset}')
+        if arguments.get("--scale"):
+            scale = arguments.get("--scale")[0]
+            scale = int(setFloatValue(scale, DEFAULT_SCALE))
+            logger.info(f'scale = {scale}')
+        if arguments.get("--source"):
+            source = str(arguments.get("--source")[0])
+            try:
+                assert os.path.exists(source)
+                logger.info(f'source = {source}')
+            except:
+                print(
+                    f'ERROR: Could not find "{source}". Exiting...'
+                )
+                sys.exit()
+        if arguments.get("--version") or arguments.get("-V"):
+            print(f"{PROGRAM} version {VERSION}.  Released {DATE} by {AUTHOR}")
+        elif arguments.get("--help") or arguments.get("-h"):
+            print(usage)
+        else:
+            t0 = time.time()
+            target = "test.png"
+            org = OrganisationDiagrammer(margin=margin, node_size=node_size)
+            data = org.load_yaml_file(source)
+            g = org.create_graph_from_yaml(data)
+            target = source[:-5] + '.dot'
+            dotfile = org.create_dotfile_from_graph(g, target)
+            print(
+                f"Successfully created dot file {dotfile} of size"
+                f" {get_file_size(dotfile)}kB"
+            )
+            image = source[:-5] + '.png'
+            org.create_graphviz_layout_from_graph(
+                g, margin=margin, cstyle=cstyle, node_size=node_size, scale=scale, offset=offset, image_file=image
+            )
+            print(
+                f"Successfully generated organogram into file {image} of size"
+                f" {get_file_size(image)}kB"
+            )
+            Image.open(image).show()
+            t1 = time.time()
+            print(f"successfully processed {source} YAML to generate {image} in {round((t1-t0),2)} seconds")
+
+    usage = """
+    {}
+    ----------------
+    Usage:
+    {} -s <source> [-m <margin>] [-n <nodesize>] [-f <style>] [-o <offset>] [-x <scale>] [-v]
+    {} -h | --help
+    {} -V | --version
+    Options:
+    -h, --help                              Show this screen.
+    -v, --verbose                           Verbose mode.
+    -V, --version                           Show version.
+    -s <source>, --source <source>          Source YAML.
+    -n <nodesize>, --nodesize <nodesize>    Node size.  Default is 7000.
+    -m <margin>, --margin <margin>          Margin.  Default 0.1.
+    -f <style>, --style <style>             Edge style. Default is arc3.
+    -x <scale>, --scale <scale>             Scale.  Default is 4.
+    -o <offset>, --offset <offset>          Offset.  Default is 0.
+    Examples
+    1. Generate verbose graphviz visualisation of test.yaml:
+    {} -s test.yaml --margin 0.2 -f angle3 -n 7500 --offset 8 -x 4 -v
+    2. Generate graphviz visualisation of homeowner.yaml:
+    {} -s homeowner.yaml --margin 0.01 -f arc -n 7500 -o 6 -x 5
+    """.format(
+        *tuple([PROGRAM] * 6)
+    )
+    arguments = docopt.docopt(usage)
+    main(arguments)
