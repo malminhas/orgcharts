@@ -1,7 +1,7 @@
 import os
 import yaml
 import pytest
-from organogram import OrganisationDiagrammer, split_line, proc_field
+from organogram import OrganisationDiagrammer, split_line, proc_field, main
 
 # To get code coverage support:
 # 1. pip install coverage, pytest-cov
@@ -185,3 +185,17 @@ def test_create_graph_from_yaml_mini_validate(diagrammer):
     assert graph.has_node(proc_field("A"))
     assert graph.has_node(proc_field("B"))
     assert graph.has_edge(proc_field("A"), proc_field("B"))
+    
+def test_main_no_args():
+    arguments = {
+         '--fontsize': [],
+         '--help': 0,
+         '--margin': [],
+         '--nodesize': [],
+         '--offset': [],
+         '--source': ['test.yaml'],
+         '--style': [],
+         '--verbose': 1,
+         '--version': 0,
+    }
+    main(arguments, open_image=False)

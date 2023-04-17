@@ -705,104 +705,103 @@ class OrganisationDiagrammer(object):
         nx.nx_agraph.write_dot(g, dot_file)
         return dot_file
 
+def main(arguments: Dict, open_image: bool=True):
+    """
+    main entry point for CLI.
+
+    **Parameters**
+
+    arguments : `Dict`
+        Input arguments
+
+    **Returns**
+
+    """
+    verbose = False
+    cstyle = DEFAULT_CSTYLE
+    node_size = DEFAULT_NODE_SIZE
+    margin = DEFAULT_MARGIN
+    offset = DEFAULT_OFFSET
+    font_size = DEFAULT_FONT_SIZE
+    logger = initLogger(False)
+    target = "test.png"
+
+    def setFloatValue(v, default):
+        try:
+            v = float(v)
+        except:
+            print(f"WARNING: Could not parse input margin, using {default}...")
+            v = default
+        return v
+
+    if arguments.get("--verbose"):
+        verbose = True
+        logger = initLogger(verbose)
+        logger.info(f"::main() - arguments =\n{arguments}")
+    if arguments.get("--style"):
+        cstyle = arguments.get("--style")[0]
+        logger.info(f"cstyle = {cstyle}")
+    if arguments.get("--margin"):
+        margin = arguments.get("--margin")[0]
+        margin = setFloatValue(margin, DEFAULT_MARGIN)
+        logger.info(f"margin = {margin}")
+    if arguments.get("--nodesize"):
+        node_size = arguments.get("--nodesize")[0]
+        node_size = int(setFloatValue(node_size, DEFAULT_NODE_SIZE))
+        logger.info(f"node_size = {node_size}")
+    if arguments.get("--fontsize"):
+        font_size = arguments.get("--fontsize")[0]
+        font_size = int(setFloatValue(font_size, DEFAULT_NODE_SIZE))
+        logger.info(f"fontsize = {font_size}")
+    if arguments.get("--offset"):
+        offset = arguments.get("--offset")[0]
+        offset = setFloatValue(offset, DEFAULT_OFFSET)
+        logger.info(f"offset = {offset}")
+    if arguments.get("--source"):
+        source = str(arguments.get("--source")[0])
+        try:
+            assert os.path.exists(source)
+            logger.info(f"source = {source}")
+        except:
+            print(f'ERROR: Could not find "{source}". Exiting...')
+            sys.exit()
+    if arguments.get("--version") or arguments.get("-V"):
+        print(f"{PROGRAM} version {VERSION}.  Released {DATE} by {AUTHOR}")
+    elif arguments.get("--help") or arguments.get("-h"):
+        print(usage)
+    else:
+        t0 = time.time()
+        org = OrganisationDiagrammer(margin=margin, node_size=node_size)
+        data = org.load_yaml_file(source)
+        g = org.create_graph_from_yaml(data)
+        target = source[:-5] + ".dot"
+        dotfile = org.create_dotfile_from_graph(g, target)
+        print(
+            f"Successfully created dot file {dotfile} of size"
+            f" {get_file_size(dotfile)}kB"
+        )
+        image = source[:-5] + ".png"
+        org.create_graphviz_layout_from_graph(
+            g,
+            margin=margin,
+            cstyle=cstyle,
+            node_size=node_size,
+            offset=offset,
+            font_size=font_size,
+            image_file=image,
+        )
+        print(
+            f"Successfully generated organogram into file {image} of size"
+            f" {get_file_size(image)}kB"
+        )
+        if open_image:
+            Image.open(image).show()
+        t1 = time.time()
+        print(
+            f"successfully processed {source} YAML to generate {image} in {round((t1-t0),2)} seconds"
+        )
 
 if __name__ == "__main__":
-
-    def main(arguments: Dict):
-        """
-        main entry point for CLI.
-
-        **Parameters**
-
-        arguments : `Dict`
-            Input arguments
-
-        **Returns**
-
-        """
-        verbose = False
-        cstyle = DEFAULT_CSTYLE
-        node_size = DEFAULT_NODE_SIZE
-        margin = DEFAULT_MARGIN
-        offset = DEFAULT_OFFSET
-        font_size = DEFAULT_FONT_SIZE
-        logger = initLogger(False)
-        target = "test.png"
-
-        def setFloatValue(v, default):
-            try:
-                v = float(v)
-            except:
-                print(f"WARNING: Could not parse input margin, using {default}...")
-                v = default
-            return v
-
-        if arguments.get("--verbose"):
-            verbose = True
-            logger = initLogger(verbose)
-            logger.info(f"::main() - arguments =\n{arguments}")
-        if arguments.get("--style"):
-            cstyle = arguments.get("--style")[0]
-            logger.info(f"cstyle = {cstyle}")
-        if arguments.get("--margin"):
-            margin = arguments.get("--margin")[0]
-            margin = setFloatValue(margin, DEFAULT_MARGIN)
-            logger.info(f"margin = {margin}")
-        if arguments.get("--nodesize"):
-            node_size = arguments.get("--nodesize")[0]
-            node_size = int(setFloatValue(node_size, DEFAULT_NODE_SIZE))
-            logger.info(f"node_size = {node_size}")
-        if arguments.get("--fontsize"):
-            font_size = arguments.get("--fontsize")[0]
-            font_size = int(setFloatValue(font_size, DEFAULT_NODE_SIZE))
-            logger.info(f"fontsize = {font_size}")
-        if arguments.get("--offset"):
-            offset = arguments.get("--offset")[0]
-            offset = setFloatValue(offset, DEFAULT_OFFSET)
-            logger.info(f"offset = {offset}")
-        if arguments.get("--source"):
-            source = str(arguments.get("--source")[0])
-            try:
-                assert os.path.exists(source)
-                logger.info(f"source = {source}")
-            except:
-                print(f'ERROR: Could not find "{source}". Exiting...')
-                sys.exit()
-        if arguments.get("--version") or arguments.get("-V"):
-            print(f"{PROGRAM} version {VERSION}.  Released {DATE} by {AUTHOR}")
-        elif arguments.get("--help") or arguments.get("-h"):
-            print(usage)
-        else:
-            t0 = time.time()
-            org = OrganisationDiagrammer(margin=margin, node_size=node_size)
-            data = org.load_yaml_file(source)
-            g = org.create_graph_from_yaml(data)
-            target = source[:-5] + ".dot"
-            dotfile = org.create_dotfile_from_graph(g, target)
-            print(
-                f"Successfully created dot file {dotfile} of size"
-                f" {get_file_size(dotfile)}kB"
-            )
-            image = source[:-5] + ".png"
-            org.create_graphviz_layout_from_graph(
-                g,
-                margin=margin,
-                cstyle=cstyle,
-                node_size=node_size,
-                offset=offset,
-                font_size=font_size,
-                image_file=image,
-            )
-            print(
-                f"Successfully generated organogram into file {image} of size"
-                f" {get_file_size(image)}kB"
-            )
-            Image.open(image).show()
-            t1 = time.time()
-            print(
-                f"successfully processed {source} YAML to generate {image} in {round((t1-t0),2)} seconds"
-            )
-
     usage = """
     {}
     ----------------
