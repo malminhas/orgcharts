@@ -1,14 +1,14 @@
 
 nodes:
   # PEOPLE in the corresponding pillar
-  # `status` can be: perm|contractor|starting|leaving|new
-  # `note` is an optional property and should be short if present as will be concatenated to 20 chars
-  # `team` is an optional property and will result in team name being shown above node
+  # status can be: perm|contractor|starting|leaving|new
+  # note is an optional property and should be short if present as will be concatenated to 20 chars
+  # team is an optional property and will result in team name being shown above node
   - id: Mickey Mouse
-    label: Head of Engineering
     rank: 1
     status: perm
     manager: 'yes'
+    label: Head of Engineering
   # Engineering Managers
   - id: Donald Duck
     rank: 2

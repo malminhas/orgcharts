@@ -1,0 +1,16 @@
+nodes:
+- id: Ty Coon
+  label: CEO
+  manager: 'yes'
+  status: perm
+  team: Team A
+  note: tyrant more like
+- id: Tech Minion
+  label: CTO
+  manager: 'no'
+  status: perm
+  team: Team B
+edges:
+- relationship: 1
+  source: Ty Coon
+  target: Tech Minion
