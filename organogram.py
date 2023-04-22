@@ -257,7 +257,7 @@ class OrganisationDiagrammer(object):
         self._validStatus = status
 
     @property
-    def valid_elations(self) -> List:
+    def valid_relations(self) -> List:
         """
         Return valid relations
 
@@ -660,6 +660,7 @@ class OrganisationDiagrammer(object):
         # Note the args here are inputs to dot.  Type dot -h to see options
         # See: https://renenyffenegger.ch/notes/tools/Graphviz/examples/organization-chart for an org chart example
         # See: https://stackoverflow.com/questions/57512155/how-to-draw-a-tree-more-beautifully-in-networkx for circo reference
+        plt.clf()
         args = "-Gnodesep=3 -Granksep=0 -Gpad=0.1 -Grankdir=TB"
         pos = nx.nx_agraph.graphviz_layout(g, prog="dot", root=None, args=args)
 
@@ -677,7 +678,10 @@ class OrganisationDiagrammer(object):
         plSize = params.get_size_inches()
         scale = 5
         params.set_size_inches((plSize[0] * scale, plSize[1] * scale))
+        logger.info(f'plSize = {plSize}, setting image size to {plSize[0] * scale} by {plSize[1] * scale}')
         plt.savefig(image_file, bbox_inches="tight")
+        # We need to reset the size of the figure to the original size
+        params.set_size_inches((plSize[0], plSize[1]))
         return g
 
     def create_dotfile_from_graph(self, g: nx.DiGraph, dot_file: str) -> str:
@@ -751,7 +755,7 @@ def main(arguments: Dict, open_image: bool=True):
         logger.info(f"node_size = {node_size}")
     if arguments.get("--fontsize"):
         font_size = arguments.get("--fontsize")[0]
-        font_size = int(setFloatValue(font_size, DEFAULT_NODE_SIZE))
+        font_size = int(setFloatValue(font_size, DEFAULT_FONT_SIZE))
         logger.info(f"fontsize = {font_size}")
     if arguments.get("--offset"):
         offset = arguments.get("--offset")[0]
@@ -773,16 +777,16 @@ def main(arguments: Dict, open_image: bool=True):
         t0 = time.time()
         org = OrganisationDiagrammer(margin=margin, node_size=node_size)
         data = org.load_yaml_file(source)
-        g = org.create_graph_from_yaml(data)
+        graph = org.create_graph_from_yaml(data)
         target = source[:-5] + ".dot"
-        dotfile = org.create_dotfile_from_graph(g, target)
+        dotfile = org.create_dotfile_from_graph(graph, target)
         print(
             f"Successfully created dot file {dotfile} of size"
             f" {get_file_size(dotfile)}kB"
         )
         image = source[:-5] + ".png"
         org.create_graphviz_layout_from_graph(
-            g,
+            graph,
             margin=margin,
             cstyle=cstyle,
             node_size=node_size,
@@ -830,4 +834,8 @@ if __name__ == "__main__":
         *tuple([PROGRAM] * 7)
     )
     arguments = docopt.docopt(usage)
+    main(arguments)
+    print('-----------')
+    main(arguments)
+    print('-----------')
     main(arguments)
