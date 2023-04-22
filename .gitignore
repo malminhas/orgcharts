@@ -1,0 +1,12 @@
+.gitignore
+*.dot
+*.png
+*.html
+*.yaml
+*.ipynb*
+*__pycache__*
+*build*
+.coverage
+.vscode
+docs/make.bat
+*~
