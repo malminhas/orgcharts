@@ -835,7 +835,3 @@ if __name__ == "__main__":
     )
     arguments = docopt.docopt(usage)
     main(arguments)
-    print('-----------')
-    main(arguments)
-    print('-----------')
-    main(arguments)
