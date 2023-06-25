@@ -97,7 +97,7 @@ We can generate a version with right angles that looks more like an org chart as
 import os
 from organogram import OrganisationDiagrammer
 
-target = 'test.png'
+target = 'test2.png'
 org.create_graphviz_layout_from_graph(g, scale=4, cstyle='angle', node_size=12000, image_file=target)
 size = os.path.getsize(target)/1024
 print(f'Successfully generated organogram into file {target} of size {size}kB')
@@ -143,6 +143,7 @@ Run the test code from the same directory with coverage as follows:
 ```
 $ pytest --exitfirst --failed-first --cov=. --cov-report html -vv
 ```
+Test coverage is currently at 92%.
 
 ### Documentation
 Run the Sphinx documentation as follows:

@@ -341,7 +341,7 @@ class OrganisationDiagrammer(object):
             name = proc_field(node.get("id"), newline)
             note = proc_field(node.get("note"))
             team = proc_field(node.get("team"))
-            job = proc_field(node.get("label"))
+            job = proc_field(node.get("label"), newline)
             rank = proc_field(node.get("rank"))
             manager = proc_field(node.get("manager"))
             if team:
@@ -398,7 +398,7 @@ class OrganisationDiagrammer(object):
             f"OrganisationDiagrammer::draw_networkx_nodes() - margin={margin}, node_size={node_size}, pos=\n{pos}"
         )
         # Pull out the different status cohorts for nodes
-        # status can be: perm|contractor|hiring|starter|joining|leaving
+        # status can be: perm|contractor|new|hiring|starter|joining|leaving
         n_perm = [(u) for (u, d) in g.nodes(data=True) if d.get("status") == "perm"]
         n_contractor = [
             (u) for (u, d) in g.nodes(data=True) if d.get("status") == "contractor"
@@ -438,6 +438,7 @@ class OrganisationDiagrammer(object):
         drawNetworkXNodes(n_hiring, "red")
         drawNetworkXNodes(n_leaving, "orange")
         drawNetworkXNodes(n_starting, "teal")
+        drawNetworkXNodes(n_new, "lightgreen")
         drawNetworkXNodes(n_moving, "yellowgreen")
         drawNetworkXNodes(n_contractor, "grey")
         drawNetworkXNodes(n_manager, "none", 5.0, "black")
@@ -629,6 +630,8 @@ class OrganisationDiagrammer(object):
         node_size: int,
         font_size: int,
         image_file: str = "org.png",
+        scale: int = 5,
+        resetScale: bool = True,
     ) -> nx.DiGraph:
         """
         Create graphviz generated visualisation of organisation from NetworkX graph.
@@ -649,6 +652,10 @@ class OrganisationDiagrammer(object):
             Size of node text
         image_file : `str`
             Target file for visualisation.  Default is `org.png`
+        scale : `int`
+            Scale of generated image
+        resetScale : `bool`
+            Whether to reset scale or not.
 
         **Returns**
 
@@ -676,12 +683,12 @@ class OrganisationDiagrammer(object):
         plt.axis("off")
         params = plt.gcf()
         plSize = params.get_size_inches()
-        scale = 5
         params.set_size_inches((plSize[0] * scale, plSize[1] * scale))
         logger.info(f'plSize = {plSize}, setting image size to {plSize[0] * scale} by {plSize[1] * scale}')
         plt.savefig(image_file, bbox_inches="tight")
-        # We need to reset the size of the figure to the original size
-        params.set_size_inches((plSize[0], plSize[1]))
+        if resetScale:
+            # We need to reset the size of the figure to the original size
+            params.set_size_inches((plSize[0], plSize[1]))
         return g
 
     def create_dotfile_from_graph(self, g: nx.DiGraph, dot_file: str) -> str:
