@@ -56,7 +56,6 @@ import sys
 import time
 import yaml
 import logging
-import docopt
 from logging import Logger
 from typing import List, Dict, Any, Optional
 import networkx as nx  # type: ignore
@@ -813,6 +812,8 @@ def main(arguments: Dict, open_image: bool=True):
         )
 
 if __name__ == "__main__":
+    import docopt
+
     usage = """
     {}
     ----------------
