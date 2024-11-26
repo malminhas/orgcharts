@@ -65,7 +65,7 @@ import matplotlib.pyplot as plt  # type: ignore
 PROGRAM = __file__.split("/")[-1]
 VERSION = "0.3"
 DATE = "09.04.23"
-AUTHOR = "<mal.minhas@checkatrade.com>"
+AUTHOR = "<mal@malm.co.uk>"
 
 VALID_STATUS = ["perm", "contractor", "starting", "leaving", "moving", "new"]
 VALID_TEAM = ["A", "B", "C", "D", "E", "F"]
