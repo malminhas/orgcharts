@@ -4,9 +4,32 @@
 This repo contains a Jupyterlab notebook called [`engineering-org-chart-zero.ipynb`](engineering-org-chart-zero.ipynb) which contains support to allow us to create organograms using the [`organogram.py`](organogram.py) module.  This module leverages the Python `networkx.py` library to generate a network graph from YAML and either use it generate a corresponding local dot file or use it to generate a `graphviz` visual layout diagram of the organisation.
 
 ### Installation
-Create a `virtualenv` and install dependencies into it as follows:
+1. Create and activate a Python virtual environment:
+```bash
+python -m venv venv
+source venv/bin/activate  # On Mac/Linux
+# or
+.\venv\Scripts\activate  # On Windows
 ```
-$ pip install -r requirements.txt
+
+2. Install system dependencies:
+```bash
+# On Mac with Homebrew
+brew install graphviz
+```
+You will also need to ensure that `dot` is in your environment if not already set:
+```bash
+export PATH="/opt/homebrew/bin:$PATH"
+```
+
+3. Install Python dependencies:
+```bash
+# Install basic requirements
+pip install -r requirements.txt
+
+You will also need to install the `graphviz` Python package:
+# Install pygraphviz (for Apple Silicon Macs M1/M2/M3)
+CFLAGS="-I/opt/homebrew/opt/graphviz/include" LDFLAGS="-L/opt/homebrew/opt/graphviz/lib" pip install pygraphviz
 ```
 
 ### YAML format

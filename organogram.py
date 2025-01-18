@@ -12,8 +12,7 @@
 #
 # Installation:
 # -------------
-# pip install -r requirements.txt
-# You will also need to install graphviz.  You can do this via Homebrew on your Mac
+# See README.md for installation instructions
 #
 # Implementation:
 # --------------
