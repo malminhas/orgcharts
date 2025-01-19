@@ -338,14 +338,14 @@ class OrganisationDiagrammer(object):
         for node in yaml_data["nodes"]:
             name = proc_field(node.get("id"), newline)
             note = proc_field(node.get("note"))
-            team = proc_field(node.get("team"))
+            team = proc_field(node.get("team"), upper=True)
             job = proc_field(node.get("label"))
             rank = proc_field(node.get("rank"))
             manager = proc_field(node.get("manager"))
-            if team:
-                if validate:
-                    assert team in self._validTeams
-                team = proc_field(team, newline, upper=True)
+            #if team:
+            #    if validate:
+            #        assert team in self._validTeams
+            #    team = proc_field(team, newline, upper=True)
             status = node.get("status")
             if validate and status:
                 assert status in self._validStatus

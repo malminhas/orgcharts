@@ -64,11 +64,15 @@ from organogram import OrganisationDiagrammer
 target = 'tycoon.png'
 org = OrganisationDiagrammer()
 g2 = org.create_graph_from_yaml(org.load_yaml_file('tycoon.yaml'),newline=True)
-org.create_graphviz_layout_from_graph(g2, font_size=16, cstyle='angle', offset=3, node_size=10000, image_file=target)
+org.create_graphviz_layout_from_graph(g2, font_size=24, cstyle='arc', margin=0.2, offset=1.5, node_size=40000, scale=3, image_file=target)
 print(f'Successfully generated organogram into file {target} of size {round(os.path.getsize(target)/1024,1)}kB')
 ```
 This generates the following inline image in the notebook:
-![image](https://user-images.githubusercontent.com/12896870/230230815-8ec80f7f-330f-4b6e-a858-c4d8df3bdec6.png)
+<img alt="image" src="tycoon.png">
+This corresponds to the following command line:
+```
+python organogram.py -s tycoon.yaml --margin 0.2 -f arc -n 40000 --offset 1.5 -x 24
+```
 
 ### Generating an organisation dot file
 The following code illustrates how to create a dot file of the more complex YAML organisation structure held in [test.yaml](test.yaml).
