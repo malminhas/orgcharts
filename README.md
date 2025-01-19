@@ -26,6 +26,8 @@ export PATH="/opt/homebrew/bin:$PATH"
 ```bash
 # Install basic requirements
 pip install -r requirements.txt
+# Or if you want to install the latest versions of the packages yourself:
+pip install pyyaml matplotlib networkx pillow docopt pytest pytest-cov
 
 You will also need to install the `graphviz` Python package:
 # Install pygraphviz (for Apple Silicon Macs M1/M2/M3)
@@ -96,8 +98,12 @@ import os
 from organogram import OrganisationDiagrammer
 
 target = 'test.png'
-g = org.create_graphviz_layout_from_graph(g, font_size=10, cstyle='arc', margin=0.1, offset=12, node_size=7000, scale=3, resetScale=False, image_file=target)
+g = org.create_graphviz_layout_from_graph(g, font_size=14, cstyle='arc', margin=0.3, offset=7, node_size=20000, scale=3, resetScale=False, image_file=target)
 print(f'Successfully generated organogram into file {target} of size {round(os.path.getsize(target)/1024,1)}kB')
+```
+This corresponds to the following command line:
+```
+python organogram.py -s test.yaml --margin 0.3 -f arc -n 20000 --offset 7 -x 14
 ```
 
 Note the following:
@@ -120,8 +126,12 @@ import os
 from organogram import OrganisationDiagrammer
 
 target = 'test2.png'
-g = org.create_graphviz_layout_from_graph(g, font_size=10, cstyle='angle', margin=0.1, offset=12, node_size=7000, scale=3, resetScale=False, image_file=target)
+g = org.create_graphviz_layout_from_graph(g, font_size=14, cstyle='angle', margin=0.3, offset=7, node_size=20000, scale=3, resetScale=False, image_file=target)
 print(f'Successfully generated organogram into file {target} of size {round(os.path.getsize(target)/1024,1)}kB')
+```
+This corresponds to the following command line:
+```
+python organogram.py -s test.yaml --margin 0.3 -f angle -n 20000 --offset 7 -x 14
 ```
 
 <img width="1500" alt="image" src="test2.png">
@@ -156,20 +166,51 @@ $ python organogram.py -h
 ```
 And here's an example of how to use it to build the above organogram from the included `test.yaml` with verbose logging enabled:
 ```
-$ python organogram.py -s test.yaml --margin 0.2 -f angle -n 7500 --offset 8 -x 16 -v
+$ python organogram.py -s test.yaml --margin 0.3 -f angle -n 20000 --offset 7 -x 14 -v
 ```
 
 ### Tests
 Run the test code from the same directory with coverage as follows:
 ```
 $ pytest --exitfirst --failed-first --cov=. --cov-report html -vv
+==================================================================== test session starts =====================================================================
+platform darwin -- Python 3.11.11, pytest-8.3.4, pluggy-1.5.0 -- /Users/malm/.virtualenvs/orgcharts/bin/python
+cachedir: .pytest_cache
+rootdir: /Users/mal.minhas/Desktop/CODE/personal/orgcharts
+plugins: cov-6.0.0, anyio-4.8.0
+collected 15 items                                                                                                                                           
+run-last-failure: no previously failed tests, not deselecting items.
+
+tests/test_organogram.py::test_load_yaml_file PASSED                                                                                                   [  6%]
+tests/test_organogram.py::test_create_graph_from_yaml PASSED                                                                                           [ 13%]
+tests/test_organogram.py::test_create_valid_teams_and_status PASSED                                                                                    [ 20%]
+tests/test_organogram.py::test_create_graph_from_yaml_validate PASSED                                                                                  [ 26%]
+tests/test_organogram.py::test_create_dotfile_from_graph PASSED                                                                                        [ 33%]
+tests/test_organogram.py::test_create_graphviz_layout_from_graph PASSED                                                                                [ 40%]
+tests/test_organogram.py::test_load_yaml_file_zero PASSED                                                                                              [ 46%]
+tests/test_organogram.py::test_load_yaml_file_none PASSED                                                                                              [ 53%]
+tests/test_organogram.py::test_create_graph_from_yaml_none PASSED                                                                                      [ 60%]
+tests/test_organogram.py::test_load_yaml_file_mini PASSED                                                                                              [ 66%]
+tests/test_organogram.py::test_create_graph_from_yaml_mini PASSED                                                                                      [ 73%]
+tests/test_organogram.py::test_create_graph_from_yaml_mini_validate PASSED                                                                             [ 80%]
+tests/test_organogram.py::test_main_no_args PASSED                                                                                                     [ 86%]
+tests/test_organogram.py::test_main_verbose PASSED                                                                                                     [ 93%]
+tests/test_organogram.py::test_main_some_args PASSED                                                                                                   [100%]
+
+--------- coverage: platform darwin, python 3.11.11-final-0 ----------
+Coverage HTML written to dir htmlcov
+
+===================================================================== 15 passed in 1.59s =====================================================================
 ```
 Test coverage is currently at 92%.
+
+<img width="400" alt="image" src="coverage.png">
 
 ### Documentation
 Run the Sphinx documentation as follows:
 ```
 $ cd docs
+$ pip install sphinx sphinx-rtd-theme
 $ make html
 $ open build/html/index.html
 ```
