@@ -614,8 +614,8 @@ class OrganisationDiagrammer(object):
             drawTextField(y + offset * 5, team, size * 1.5, fcolor)
         for name, d in n_note:  # node note goes inside the node
             x, y = pos.get(name)
-            note = proc_field(d.get("note"), True)
-            drawTextField(y - offset * 1.75, note, size * 0.75, fcolor)
+            note = proc_field(d.get("note"))
+            drawTextField(y - offset * 1.5, note, size * 0.75, fcolor)
         for name, d in n_jobtitle:  # jobtitle goes at the bottom of the node
             x, y = pos.get(name)
             job = d.get("jobtitle")
@@ -670,6 +670,7 @@ class OrganisationDiagrammer(object):
         plt.clf()
         #args = "-Gnodesep=3 -Granksep=0 -Gpad=0.1 -Grankdir=TB"
         args = "-Gnodesep=3 -Granksep=0.05 -Gpad=1.0 -Gmargin=1.0 -Grankdir=TB"
+        scale = 4
         plt.figure(figsize=(scale * 3, scale))  # Larger scale = larger figure size
         pos = nx.nx_agraph.graphviz_layout(g, prog="dot", root=None, args=args)
 
@@ -688,7 +689,7 @@ class OrganisationDiagrammer(object):
         params.set_size_inches((plSize[0] * scale, plSize[1] * scale))
         logger.info(f'plSize = {plSize}, setting image size to {plSize[0] * scale} by {plSize[1] * scale}')
         # Add padding to ensure edges don't get cut off
-        plt.savefig(image_file, bbox_inches="tight", pad_inches=1)
+        plt.savefig(image_file, bbox_inches="tight", pad_inches=0.0)
         if resetScale:
             # We need to reset the size of the figure to the original size
             params.set_size_inches((plSize[0], plSize[1]))

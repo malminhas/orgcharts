@@ -14,13 +14,13 @@ nodes:
     rank: 2
     status: leaving
     manager: 'yes'
-    note: leaving 30.03.23
+    note: "leaves 30.03.23"
     label: "Engineering\nManager"
   - id: Daffy Duck
     rank: 2
     status: starting
     manager: 'yes'
-    note: starting 03.04.23
+    note: "starts 03.04.23"
     label: "Engineering\nManager"
   # Staff Engineers
   - id: Pluto Dog
