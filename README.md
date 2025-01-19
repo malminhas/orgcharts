@@ -117,7 +117,7 @@ Note the following:
 * Direct line management in indicated in a solid line
 * Indirect management/supervision is indicated by a dotted line
 
-<img width="1715" alt="image" src="test.png">
+<img alt="image" src="test.png">
 
 We can generate a version with right angles that looks more like an org chart as follows:
 
@@ -134,7 +134,7 @@ This corresponds to the following command line:
 python organogram.py -s test.yaml --margin 0.3 -f angle -n 20000 --offset 7 -x 14
 ```
 
-<img width="1500" alt="image" src="test2.png">
+<img alt="image" src="test2.png">
 
 ### CLI
 There is a command line interface built into the module.  Here's the built in help:
