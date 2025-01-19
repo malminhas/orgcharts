@@ -339,7 +339,7 @@ class OrganisationDiagrammer(object):
             name = proc_field(node.get("id"), newline)
             note = proc_field(node.get("note"))
             team = proc_field(node.get("team"))
-            job = proc_field(node.get("label"), newline)
+            job = proc_field(node.get("label"))
             rank = proc_field(node.get("rank"))
             manager = proc_field(node.get("manager"))
             if team:
@@ -447,7 +447,8 @@ class OrganisationDiagrammer(object):
             font_color="w",
             font_family="sans-serif",
             horizontalalignment="center",
-            verticalalignment="bottom",
+            verticalalignment="baseline",
+            font_weight="bold",
         )
 
     def draw_networkx_edges(self, g: nx.DiGraph, pos: Dict, cstyle: str):
@@ -597,6 +598,7 @@ class OrganisationDiagrammer(object):
                 size=size,
                 bbox=dict(facecolor=fcolor, edgecolor=ecolor, alpha=0.5),
                 horizontalalignment="center",
+                weight="bold",
             )
 
         n_note = [(u, d) for (u, d) in g.nodes(data=True) if d.get("note")]
@@ -609,15 +611,15 @@ class OrganisationDiagrammer(object):
         for name, d in n_team:  # node team goes above the node
             x, y = pos.get(name)
             team = d.get("team")
-            drawTextField(y + offset * 2, team, size * 1.5, fcolor)
+            drawTextField(y + offset * 5, team, size * 1.5, fcolor)
         for name, d in n_note:  # node note goes inside the node
             x, y = pos.get(name)
             note = proc_field(d.get("note"), True)
-            drawTextField(y - offset, note, size, fcolor)
-        for name, d in n_jobtitle:  # jobtitle goes below the node
+            drawTextField(y - offset * 1.75, note, size * 0.75, fcolor)
+        for name, d in n_jobtitle:  # jobtitle goes at the bottom of the node
             x, y = pos.get(name)
             job = d.get("jobtitle")
-            drawTextField(y - offset * 2, job, size * 1.25, fcolor)
+            drawTextField(y - offset * 3.5, job, size, fcolor)
 
     def create_graphviz_layout_from_graph(
         self,
@@ -628,7 +630,7 @@ class OrganisationDiagrammer(object):
         node_size: int,
         font_size: int,
         image_file: str = "org.png",
-        scale: int = 5,
+        scale: int = 4,
         resetScale: bool = True,
     ) -> nx.DiGraph:
         """
@@ -666,7 +668,9 @@ class OrganisationDiagrammer(object):
         # See: https://renenyffenegger.ch/notes/tools/Graphviz/examples/organization-chart for an org chart example
         # See: https://stackoverflow.com/questions/57512155/how-to-draw-a-tree-more-beautifully-in-networkx for circo reference
         plt.clf()
-        args = "-Gnodesep=3 -Granksep=0 -Gpad=0.1 -Grankdir=TB"
+        #args = "-Gnodesep=3 -Granksep=0 -Gpad=0.1 -Grankdir=TB"
+        args = "-Gnodesep=3 -Granksep=0.05 -Gpad=1.0 -Gmargin=1.0 -Grankdir=TB"
+        plt.figure(figsize=(scale * 3, scale))  # Larger scale = larger figure size
         pos = nx.nx_agraph.graphviz_layout(g, prog="dot", root=None, args=args)
 
         self.draw_networkx_nodes(g, pos, margin, node_size, font_size)
@@ -683,7 +687,8 @@ class OrganisationDiagrammer(object):
         plSize = params.get_size_inches()
         params.set_size_inches((plSize[0] * scale, plSize[1] * scale))
         logger.info(f'plSize = {plSize}, setting image size to {plSize[0] * scale} by {plSize[1] * scale}')
-        plt.savefig(image_file, bbox_inches="tight")
+        # Add padding to ensure edges don't get cut off
+        plt.savefig(image_file, bbox_inches="tight", pad_inches=1)
         if resetScale:
             # We need to reset the size of the figure to the original size
             params.set_size_inches((plSize[0], plSize[1]))
