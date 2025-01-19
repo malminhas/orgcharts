@@ -103,7 +103,7 @@ print(f'Successfully generated organogram into file {target} of size {round(os.p
 ```
 This corresponds to the following command line:
 ```
-python organogram.py -s test.yaml --margin 0.3 -f arc -n 20000 --offset 7 -x 14
+python organogram.py -s test.yaml --margin 0.3 -f arc -n 20000 --offset 7 -x 18
 ```
 
 Note the following:
@@ -131,7 +131,7 @@ print(f'Successfully generated organogram into file {target} of size {round(os.p
 ```
 This corresponds to the following command line:
 ```
-python organogram.py -s test.yaml --margin 0.3 -f angle -n 20000 --offset 7 -x 14
+python organogram.py -s test.yaml --margin 0.3 -f angle -n 20000 --offset 7 -x 18
 ```
 
 <img alt="image" src="test2.png">
@@ -166,7 +166,7 @@ $ python organogram.py -h
 ```
 And here's an example of how to use it to build the above organogram from the included `test.yaml` with verbose logging enabled:
 ```
-$ python organogram.py -s test.yaml --margin 0.3 -f angle -n 20000 --offset 7 -x 14 -v
+$ python organogram.py -s test.yaml --margin 0.3 -f angle -n 20000 --offset 7 -x 18 -v
 ```
 
 ### Tests
