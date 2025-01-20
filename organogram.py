@@ -39,6 +39,7 @@
 # 02.04.23    v0.1    First working version with graphviz and dot support
 # 08.04.23    v0.2    Added CLI, logging, type support, ran through black and added initial Sphinx support
 # 09.04.23    v0.3    Enhanced CLI
+# 19.01.25    v0.4    Updated after rerunning again.
 #
 # ToDo:
 # -------
@@ -53,17 +54,17 @@ This module has one main class:
 import os
 import sys
 import time
-import yaml
+import yaml # type: ignore
 import logging
 from logging import Logger
 from typing import List, Dict, Any, Optional
 import networkx as nx  # type: ignore
-from PIL import Image
+from PIL import Image # type: ignore
 import matplotlib.pyplot as plt  # type: ignore
 
 PROGRAM = __file__.split("/")[-1]
-VERSION = "0.3"
-DATE = "09.04.23"
+VERSION = "0.4"
+DATE = "19.01.25"
 AUTHOR = "<mal@malm.co.uk>"
 
 VALID_STATUS = ["perm", "contractor", "starting", "leaving", "moving", "new"]
